@@ -17,6 +17,9 @@ public class PhysicalInventoryService {
     public Software reserve(java.util.UUID productId, int quantity) {
         Software product = softwareRepository.findByIdForUpdate(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + productId));
+        if (!Boolean.TRUE.equals(product.getPhysicalProduct())) {
+            return product;
+        }
         int stock = product.getStockQuantity() != null ? product.getStockQuantity() : 0;
         int reserved = product.getReservedQuantity() != null ? product.getReservedQuantity() : 0;
         if (stock - reserved < quantity) {
@@ -37,6 +40,9 @@ public class PhysicalInventoryService {
     private void adjustReservation(java.util.UUID productId, int quantity, boolean deductStock) {
         Software product = softwareRepository.findByIdForUpdate(productId)
                 .orElseThrow(() -> new ResourceNotFoundException("Producto no encontrado: " + productId));
+        if (!Boolean.TRUE.equals(product.getPhysicalProduct())) {
+            return;
+        }
         int reserved = Math.max(0, (product.getReservedQuantity() != null ? product.getReservedQuantity() : 0) - quantity);
         product.setReservedQuantity(reserved);
         if (deductStock) {

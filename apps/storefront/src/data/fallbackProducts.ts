@@ -7,6 +7,9 @@ const ecProducts: StorefrontProduct[] = [
     name: "Microsoft 365 Personal",
     shortName: "Microsoft 365 Personal",
     brand: "Microsoft",
+    physicalProduct: false,
+    availableQuantity: 20,
+    inStock: true,
     description: "Suscripción digital para productividad, documentos y almacenamiento en la nube.",
     longDescription: "Suscripción digital para productividad, documentos y almacenamiento en la nube.",
     platform: "Windows, macOS, Web",
@@ -29,6 +32,9 @@ const ecProducts: StorefrontProduct[] = [
     name: "Windows 11 Pro",
     shortName: "Windows 11 Pro",
     brand: "Microsoft",
+    physicalProduct: false,
+    availableQuantity: 20,
+    inStock: true,
     description: "Producto físico para uso profesional, con disponibilidad y entrega verificadas.",
     longDescription: "Producto físico para uso profesional, con disponibilidad y entrega verificadas.",
     platform: "Windows",
@@ -51,6 +57,9 @@ const ecProducts: StorefrontProduct[] = [
     name: "Kaspersky Standard",
     shortName: "Kaspersky Standard",
     brand: "Kaspersky",
+    physicalProduct: false,
+    availableQuantity: 20,
+    inStock: true,
     description: "Protección esencial para navegar, comprar y trabajar con mayor tranquilidad.",
     longDescription: "Protección esencial para navegar, comprar y trabajar con mayor tranquilidad.",
     platform: "Windows, Android",
@@ -67,13 +76,6 @@ const ecProducts: StorefrontProduct[] = [
   }
 ];
 
-const peProducts: StorefrontProduct[] = ecProducts.map((product) => ({
-  ...product,
-  finalPrice: Number((product.finalPrice * 3.75).toFixed(2)),
-  wholesalePrice: Number(((product.wholesalePrice ?? product.finalPrice) * 3.75).toFixed(2)),
-  compareAtPrice: product.compareAtPrice ? Number((product.compareAtPrice * 3.75).toFixed(2)) : undefined
-}));
-
-export function getFallbackProducts(country: CountryCode): StorefrontProduct[] {
-  return country === "PE" ? peProducts : ecProducts;
+export function getFallbackProducts(_country: CountryCode): StorefrontProduct[] {
+  return ecProducts;
 }

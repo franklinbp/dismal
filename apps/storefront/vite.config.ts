@@ -12,8 +12,8 @@ const sites: Record<"ecuador" | "peru", SiteMetadata> = {
   ecuador: {
     domain: "https://www.dismal.net",
     language: "es-EC",
-    title: "Dismal Ecuador | Software y licencias digitales",
-    description: "Compara software y licencias digitales en Ecuador con precios visibles, seguimiento de orden y soporte postventa."
+    title: "Dismal Ecuador | Tecnologia y licencias digitales",
+    description: "Compra computadoras, impresoras, telefonia movil, discos SSD y licencias digitales en Ecuador."
   },
   peru: {
     domain: "https://www.dismal.net.pe",

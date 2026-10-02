@@ -120,6 +120,7 @@ public class StorefrontOrderService {
 
         BigDecimal subtotal = BigDecimal.ZERO;
         int totalQuantity = 0;
+        boolean hasPhysicalProducts = false;
         for (StorefrontOrderItemRequest itemRequest : mergeItems(request.items()).values()) {
             int quantity = validateQuantity(itemRequest.quantity());
             totalQuantity += quantity;
@@ -128,6 +129,7 @@ public class StorefrontOrderService {
             }
 
             Software software = physicalInventoryService.reserve(itemRequest.productId(), quantity);
+            hasPhysicalProducts = hasPhysicalProducts || Boolean.TRUE.equals(software.getPhysicalProduct());
             BigDecimal unitPrice = pricingService.resolvePrice(software, country.name(), effectiveCustomerType);
             BigDecimal lineSubtotal = unitPrice.multiply(BigDecimal.valueOf(quantity));
             subtotal = subtotal.add(lineSubtotal);
@@ -142,6 +144,11 @@ public class StorefrontOrderService {
                     .subtotal(lineSubtotal)
                     .build();
             order.getItems().add(item);
+        }
+
+        if (hasPhysicalProducts && (isBlank(request.shipping().addressLine1())
+                || isBlank(request.shipping().city()) || isBlank(request.shipping().region()))) {
+            throw new BadRequestException("La direccion, ciudad y provincia son obligatorias para productos fisicos.");
         }
 
         order.setSubtotal(subtotal);
@@ -377,6 +384,10 @@ public class StorefrontOrderService {
 
     private String clean(String value) {
         return value != null ? value.trim() : null;
+    }
+
+    private boolean isBlank(String value) {
+        return value == null || value.isBlank();
     }
 
     private String generateOrderNumber(StorefrontCountry country) {

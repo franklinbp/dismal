@@ -69,7 +69,7 @@ export async function createStorefrontOrder(
       orderNumber: "DEMO",
       status: "PENDING_PAYMENT",
       country: request.country,
-      currency: request.country === "PE" ? "PEN" : "USD",
+      currency: "USD",
       customerType: request.customerType === "wholesale" ? "DISTRIBUTOR" : "FINAL",
       checkoutMethod: request.checkoutMethod,
       paymentRequired: true,

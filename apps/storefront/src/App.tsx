@@ -499,7 +499,11 @@ function App() {
 
   const cartTotal = cartLines.reduce((total, item) => total + item.lineTotal, 0);
   const cartCount = cart.reduce((total, item) => total + item.quantity, 0);
-  const unavailableCartCount = cartCount - cartLines.reduce((total, item) => total + item.quantity, 0);
+  const unavailableCartCount = cartCount - cartLines.reduce(
+    (total, item) => total + (item.product.inStock && item.quantity <= item.product.availableQuantity ? item.quantity : 0),
+    0
+  );
+  const cartHasPhysicalProducts = cartLines.some((item) => item.product.physicalProduct);
 
   function navigateTo(nextView: StoreView) {
     const route = routeForView(nextView);
@@ -534,6 +538,10 @@ function App() {
 
   function addToCart(productId: string) {
     const product = products.find((item) => item.id === productId);
+    if (!product?.inStock) {
+      setAnnouncement(product ? `${product.name} está agotado temporalmente.` : "Producto no disponible.");
+      return;
+    }
     setCart((current) => upsertCartItem(current, productId, 1));
     setSelectedProduct(null);
     setCartOpen(true);
@@ -552,7 +560,10 @@ function App() {
 
   function buyNow(productId: string) {
     const product = products.find((item) => item.id === productId);
-    if (!product) return;
+    if (!product?.inStock) {
+      setAnnouncement(product ? `${product.name} está agotado temporalmente.` : "Producto no disponible.");
+      return;
+    }
     setCart((current) => upsertCartItem(current, productId, 1));
     setSelectedProduct(null);
     setCartOpen(false);
@@ -578,10 +589,12 @@ function App() {
       setCart((current) => current.filter((item) => item.productId !== productId));
       return;
     }
+    const product = products.find((item) => item.id === productId);
+    const maximum = product ? Math.min(50, product.availableQuantity) : 50;
     setCart((current) =>
       current.map((item) =>
         item.productId === productId
-          ? { ...item, quantity: Math.min(quantity, 50) }
+          ? { ...item, quantity: Math.min(quantity, maximum) }
           : item
       )
     );
@@ -880,12 +893,16 @@ function App() {
       !checkoutCustomer.lastName.trim() ||
       !checkoutCustomer.email.trim() ||
       !checkoutCustomer.phone.trim() ||
-      !shippingAddress.addressLine1.trim() ||
-      !shippingAddress.city.trim() ||
-      !shippingAddress.region.trim()
+      (cartHasPhysicalProducts && (
+        !shippingAddress.addressLine1.trim() ||
+        !shippingAddress.city.trim() ||
+        !shippingAddress.region.trim()
+      ))
     ) {
       setOrderStatus("error");
-      setOrderMessage("Completa tus datos de contacto y la dirección de entrega.");
+      setOrderMessage(cartHasPhysicalProducts
+        ? "Completa tus datos de contacto y la dirección de entrega."
+        : "Completa tus datos de contacto.");
       return;
     }
     if (!authToken && (checkoutCustomer.password || "").length < 8) {
@@ -1791,12 +1808,18 @@ function App() {
                     <label>WhatsApp<input type="tel" inputMode="tel" autoComplete="tel" maxLength={24} required value={checkoutCustomer.phone} onChange={(event) => updateCheckoutField("phone", event.target.value)} /></label>
                     <label>Documento o RUC<input type="text" inputMode="numeric" autoComplete="off" maxLength={24} value={checkoutCustomer.taxId} onChange={(event) => updateCheckoutField("taxId", event.target.value)} /></label>
                     {!currentUser ? <label className="wide-field">Crea una contraseña<input type="password" autoComplete="new-password" minLength={8} maxLength={128} required value={checkoutCustomer.password || ""} onChange={(event) => updateCheckoutField("password", event.target.value)} /><small>Mínimo 8 caracteres para proteger tus pedidos.</small></label> : null}
-                    <label className="wide-field">Dirección de entrega<input type="text" autoComplete="street-address" maxLength={220} required value={shippingAddress.addressLine1} onChange={(event) => setShippingAddress((current) => ({ ...current, addressLine1: event.target.value }))} /></label>
-                    <label className="wide-field">Complemento o referencia<input type="text" maxLength={220} value={shippingAddress.addressLine2} onChange={(event) => setShippingAddress((current) => ({ ...current, addressLine2: event.target.value }))} /></label>
-                    <label>Ciudad<input type="text" autoComplete="address-level2" maxLength={120} required value={shippingAddress.city} onChange={(event) => setShippingAddress((current) => ({ ...current, city: event.target.value }))} /></label>
-                    <label>Provincia / Región<input type="text" autoComplete="address-level1" maxLength={120} required value={shippingAddress.region} onChange={(event) => setShippingAddress((current) => ({ ...current, region: event.target.value }))} /></label>
-                    <label>Código postal<input type="text" autoComplete="postal-code" maxLength={32} value={shippingAddress.postalCode} onChange={(event) => setShippingAddress((current) => ({ ...current, postalCode: event.target.value }))} /></label>
-                    <label>Indicaciones de entrega<input type="text" maxLength={500} value={shippingAddress.notes} onChange={(event) => setShippingAddress((current) => ({ ...current, notes: event.target.value }))} /></label>
+                    {cartHasPhysicalProducts ? (
+                      <>
+                        <label className="wide-field">Dirección de entrega<input type="text" autoComplete="street-address" maxLength={220} required value={shippingAddress.addressLine1} onChange={(event) => setShippingAddress((current) => ({ ...current, addressLine1: event.target.value }))} /></label>
+                        <label className="wide-field">Complemento o referencia<input type="text" maxLength={220} value={shippingAddress.addressLine2} onChange={(event) => setShippingAddress((current) => ({ ...current, addressLine2: event.target.value }))} /></label>
+                        <label>Ciudad<input type="text" autoComplete="address-level2" maxLength={120} required value={shippingAddress.city} onChange={(event) => setShippingAddress((current) => ({ ...current, city: event.target.value }))} /></label>
+                        <label>Provincia / Región<input type="text" autoComplete="address-level1" maxLength={120} required value={shippingAddress.region} onChange={(event) => setShippingAddress((current) => ({ ...current, region: event.target.value }))} /></label>
+                        <label>Código postal<input type="text" autoComplete="postal-code" maxLength={32} value={shippingAddress.postalCode} onChange={(event) => setShippingAddress((current) => ({ ...current, postalCode: event.target.value }))} /></label>
+                        <label>Indicaciones de entrega<input type="text" maxLength={500} value={shippingAddress.notes} onChange={(event) => setShippingAddress((current) => ({ ...current, notes: event.target.value }))} /></label>
+                      </>
+                    ) : (
+                      <p className="wide-field">Esta orden es completamente digital. Recibirás las activaciones en tu correo después de confirmar el pago.</p>
+                    )}
                   </div>
 
                   <section className="checkout-methods" aria-labelledby="checkout-method-title">

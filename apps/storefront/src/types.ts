@@ -1,4 +1,4 @@
-export type CountryCode = "EC" | "PE";
+export type CountryCode = "EC";
 
 export type CustomerType = "final" | "wholesale";
 
@@ -9,6 +9,9 @@ export type StorefrontProduct = {
   name: string;
   shortName: string;
   brand?: string;
+  physicalProduct: boolean;
+  availableQuantity: number;
+  inStock: boolean;
   description: string;
   longDescription: string;
   platform: string;

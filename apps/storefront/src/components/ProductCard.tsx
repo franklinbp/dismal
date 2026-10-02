@@ -27,6 +27,7 @@ export default function ProductCard({
       </button>
       <div className="product-body">
         <span className="product-kicker">{product.category} · {product.platform}</span>
+        <span className="product-kicker">{product.physicalProduct ? "Producto físico" : "Producto digital"} · {product.inStock ? `${product.availableQuantity} disponibles` : "Agotado temporalmente"}</span>
         <button className="product-title" type="button" onClick={onDetails}>{product.name}</button>
         <p>{product.description}</p>
         <ul>
@@ -45,8 +46,8 @@ export default function ProductCard({
           <button className="product-detail-button" type="button" onClick={onDetails} aria-label={`Ver detalles de ${product.name}`}>
             Ver detalles <ChevronRight size={16} aria-hidden="true" />
           </button>
-          <button className="add-button" type="button" onClick={onBuyNow} aria-label={`Comprar ahora ${product.name}`}>
-            <ShoppingCart size={17} aria-hidden="true" /> Comprar
+          <button className="add-button" type="button" disabled={!product.inStock} onClick={onBuyNow} aria-label={`Comprar ahora ${product.name}`}>
+            <ShoppingCart size={17} aria-hidden="true" /> {product.inStock ? "Comprar" : "Agotado"}
           </button>
         </div>
       </div>

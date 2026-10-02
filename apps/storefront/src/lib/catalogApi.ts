@@ -17,6 +17,10 @@ type PublicProductResponse = {
   platform?: string;
   imageUrl?: string;
   sku?: string;
+  brand?: string;
+  physicalProduct?: boolean;
+  availableQuantity?: number;
+  inStock?: boolean;
   category?: string;
   subcategory?: string;
   compatibility?: string[];
@@ -77,6 +81,8 @@ function fromApiProduct(product: PublicProductResponse): StorefrontProduct | nul
   const wholesalePrice = toOptionalNumber(product.wholesalePrice);
   const publicPrice = toOptionalNumber(product.publicPrice);
   const sourceDescription = product.description?.trim() || "";
+  const physicalProduct = product.physicalProduct !== false;
+  const availableQuantity = Math.max(0, Math.trunc(toOptionalNumber(product.availableQuantity) ?? 0));
   const genericDescription = /licencia digital.*(entrega|soporte)|software original/i.test(sourceDescription);
   const description = !sourceDescription || genericDescription
     ? defaultProductDescription(category)
@@ -88,7 +94,10 @@ function fromApiProduct(product: PublicProductResponse): StorefrontProduct | nul
     sku: product.sku?.trim() || undefined,
     name,
     shortName: name,
-    brand: inferProductBrand(name),
+    brand: product.brand?.trim() || inferProductBrand(name),
+    physicalProduct,
+    availableQuantity,
+    inStock: product.inStock === true && availableQuantity > 0,
     description,
     longDescription: description,
     platform: product.platform?.trim() || "Digital",
@@ -107,8 +116,12 @@ function fromApiProduct(product: PublicProductResponse): StorefrontProduct | nul
     devices: product.devices?.trim() || undefined,
     language: product.language?.trim() || undefined,
     region: product.region?.trim() || undefined,
-    delivery: "Despacho físico después de confirmar el pago y las existencias.",
-    support: "Soporte postventa para cambios, garantía y seguimiento.",
+    delivery: physicalProduct
+      ? "Despacho físico después de confirmar el pago y las existencias."
+      : "Entrega digital después de confirmar el pago.",
+    support: physicalProduct
+      ? "Soporte postventa para cambios, garantía y seguimiento."
+      : "Soporte para la activación y uso de tu producto digital.",
     finalPrice,
     wholesalePrice: wholesalePrice && wholesalePrice > 0 ? wholesalePrice : undefined,
     compareAtPrice: publicPrice && publicPrice > finalPrice ? publicPrice : undefined

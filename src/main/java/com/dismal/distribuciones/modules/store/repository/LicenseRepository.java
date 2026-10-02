@@ -47,6 +47,11 @@ public interface LicenseRepository extends JpaRepository<License, UUID>, JpaSpec
            "AND l.usedActivations < l.maxActivations ORDER BY l.id ASC")
     List<License> findAvailableUnassignedLicenses(@Param("softwareId") UUID softwareId, Pageable pageable);
 
+    @Query("SELECT COALESCE(SUM(CASE WHEN l.status = com.dismal.distribuciones.modules.store.domain.LicenseStatus.ACTIVE " +
+           "AND l.usedActivations < l.maxActivations THEN (l.maxActivations - l.usedActivations) ELSE 0 END), 0) " +
+           "FROM License l WHERE l.software.id = :softwareId")
+    long countAvailableActivations(@Param("softwareId") UUID softwareId);
+
     @Query("SELECT l.software.id AS softwareId, l.software.name AS softwareName, " +
            "SUM(CASE WHEN l.status = com.dismal.distribuciones.modules.store.domain.LicenseStatus.ACTIVE " +
            "AND l.usedActivations < l.maxActivations THEN (l.maxActivations - l.usedActivations) ELSE 0 END) AS availableCount, " +

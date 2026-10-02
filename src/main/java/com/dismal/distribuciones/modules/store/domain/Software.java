@@ -67,7 +67,7 @@ public class Software {
 
     @Column(nullable = false)
     @Builder.Default
-    private Boolean physicalProduct = true;
+    private Boolean physicalProduct = false;
 
     @OneToMany(mappedBy = "software", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore

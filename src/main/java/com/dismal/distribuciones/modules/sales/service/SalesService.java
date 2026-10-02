@@ -415,6 +415,9 @@ public class SalesService {
         List<com.dismal.distribuciones.modules.sales.dto.SaleItemRequest> requestItems = toSaleItemRequests(sale);
         for (int index = 0; index < sale.getItems().size(); index++) {
             SaleItem item = sale.getItems().get(index);
+            if (Boolean.TRUE.equals(item.getSoftware().getPhysicalProduct())) {
+                continue;
+            }
             com.dismal.distribuciones.modules.sales.dto.SaleItemRequest requestItem = requestItems.get(index);
             int required = item.getQuantity() != null ? item.getQuantity() : 0;
             if (required <= 0) {
@@ -496,6 +499,9 @@ public class SalesService {
 
         for (int index = 0; index < sale.getItems().size(); index++) {
             SaleItem item = sale.getItems().get(index);
+            if (Boolean.TRUE.equals(item.getSoftware().getPhysicalProduct())) {
+                continue;
+            }
             com.dismal.distribuciones.modules.sales.dto.SaleItemRequest requestItem = requestItems.get(index);
             int remaining = item.getQuantity() != null ? item.getQuantity() : 0;
             if (remaining <= 0) {

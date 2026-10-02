@@ -40,11 +40,11 @@ export default function Home() {
             <span className="h-1.5 w-1.5 rounded-full bg-accent" />
           </div>
           <h1 className="font-display text-4xl leading-tight text-ink md:text-5xl">
-            Licencias digitales y productos digitales listos para vender.
+            Productos tecnologicos y licencias listos para vender.
           </h1>
           <p className="text-base text-slate/70 md:text-lg">
-            Dismal centraliza catalogo, activaciones y entregas para que vendas licencias digitales
-            con control total y operacion sin friccion.
+            Dismal centraliza importacion, inventario, ventas y entregas de computadoras, impresoras,
+            telefonia movil, discos SSD y licencias digitales.
           </p>
           <div className="flex flex-wrap items-center gap-4">
             <a href="#demo" className="btn btn-primary text-xs">
@@ -56,9 +56,9 @@ export default function Home() {
           </div>
           <div className="grid grid-cols-2 gap-6 pt-6 md:grid-cols-3">
             {[
-              ["+32%", "Conversion en productos digitales"],
-              ["-40%", "Errores en entrega de licencias"],
-              ["24/7", "Inventario de activaciones"],
+              ["Unificado", "Inventario fisico y digital"],
+              ["Mayorista", "Atencion a distribuidores"],
+              ["24/7", "Control de stock y activaciones"],
             ].map(([value, label]) => (
               <div key={label} className="rounded-2xl border border-ink/10 bg-white/70 p-4 shadow-panel">
                 <p className="font-display text-2xl text-ink">{value}</p>
@@ -73,7 +73,7 @@ export default function Home() {
           <div className="mt-6 space-y-4">
             {[
               ["Ventas hoy", "$18,540", "+12%"],
-              ["Licencias entregadas", "128", "+18%"],
+              ["Productos gestionados", "128", "+18%"],
               ["Campanas activas", "5", "2 nuevas"],
             ].map(([label, value, delta]) => (
               <div key={label} className="rounded-2xl border border-smoke/70 bg-white p-4">
@@ -93,8 +93,8 @@ export default function Home() {
       <section id="plataforma" className="relative z-10 mx-auto w-full max-w-6xl px-6 py-16">
         <div className="grid gap-8 md:grid-cols-3">
           {[
-            ["Ventas y entrega digital", "Checkout de productos digitales y entrega automatica de licencias."],
-            ["Inventario de licencias", "Activaciones y stock sincronizados para evitar quiebres y sobreventa."],
+            ["Venta fisica y digital", "Pedidos de equipos tecnologicos y entrega automatizada de licencias."],
+            ["Inventario unificado", "Unidades fisicas y activaciones sincronizadas para evitar quiebres y sobreventa."],
             ["Marketing inteligente", "Campanas con foco en margen y acciones recomendadas."],
           ].map(([title, body]) => (
             <div key={title} className="rounded-3xl border border-ink/10 bg-white/80 p-6 shadow-panel">
@@ -109,7 +109,7 @@ export default function Home() {
         <div className="grid gap-8 rounded-[36px] border border-ink/10 bg-ink px-8 py-10 text-white md:grid-cols-[minmax(0,1.1fr)_minmax(0,0.9fr)]">
           <div>
             <p className="text-xs uppercase tracking-[0.3em] text-white/60">Impacto Operativo</p>
-            <h2 className="mt-4 font-display text-3xl">Operacion digital medible, decisiones mas rapidas.</h2>
+            <h2 className="mt-4 font-display text-3xl">Operacion comercial medible, decisiones mas rapidas.</h2>
             <p className="mt-4 text-sm text-white/70">
               Cada equipo trabaja con la misma fuente de datos. Metas, margen y entregas se observan en
               un mismo tablero.
@@ -117,8 +117,8 @@ export default function Home() {
           </div>
           <div className="space-y-4">
             {[
-              ["Rentabilidad", "Metas y margen por producto digital"],
-              ["Entrega", "Alertas y seguimiento de licencias activadas"],
+              ["Rentabilidad", "Metas y margen por categoria y producto"],
+              ["Entrega", "Seguimiento de despachos y licencias activadas"],
               ["Integraciones", "N8N, correo y automatizaciones"],
             ].map(([label, detail]) => (
               <div key={label} className="rounded-2xl border border-white/10 bg-white/5 p-4">
@@ -134,12 +134,12 @@ export default function Home() {
         <div className="grid gap-6 md:grid-cols-[minmax(0,0.9fr)_minmax(0,1.1fr)]">
           <div className="rounded-[32px] border border-ink/10 bg-white/80 p-6 shadow-panel">
             <p className="text-xs uppercase tracking-[0.3em] text-slate/50">Flujo Unificado</p>
-            <h2 className="mt-3 font-display text-2xl text-ink">Operacion digital lista para escalar</h2>
+            <h2 className="mt-3 font-display text-2xl text-ink">Importacion y distribucion listas para escalar</h2>
             <ul className="mt-6 space-y-4 text-sm text-slate/70">
               {[
-                "Ventas conectadas con activaciones y entrega inmediata.",
-                "Alertas automaticas de licencias y stock critico.",
-                "Segmentacion de campanas para productos digitales.",
+                "Ventas conectadas con inventario fisico y activaciones.",
+                "Alertas automaticas de licencias y stock fisico critico.",
+                "Segmentacion de campañas por categoria y tipo de producto.",
                 "Dashboards por rol para cada equipo.",
               ].map((item) => (
                 <li key={item} className="flex items-start gap-3">

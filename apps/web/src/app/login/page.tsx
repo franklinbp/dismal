@@ -50,24 +50,27 @@ export default function LoginPage() {
           <div className="max-w-xl space-y-6">
             <p className="admin-kicker">
               <span className="admin-dot" />
-              Suite Administrativa
+              Importadora tecnologica ecuatoriana
             </p>
             <h1 className="font-display text-6xl leading-[0.95] text-ink">
-              Control comercial simple, sobrio y listo para operar.
+              Tecnologia para empresas, hogares y distribuidores.
             </h1>
             <p className="max-w-lg text-base leading-7 text-slate/80">
-              Dismal centraliza ventas, clientes, cartera, licencias y seguimiento operativo en un panel
-              administrativo pensado para trabajo diario, no para demos vacias.
+              Dismal Distribuciones importa y comercializa equipos informaticos, impresion, telefonia movil,
+              almacenamiento y licencias digitales con inventario, ventas y posventa en una sola operacion.
             </p>
-            <div className="grid max-w-lg grid-cols-3 gap-4">
+            <div className="grid max-w-xl grid-cols-2 gap-3">
               {[
-                ["Ventas", "Operacion comercial"],
-                ["Cobros", "Cartera visible"],
-                ["Metas", "Seguimiento diario"],
+                ["Computacion", "Laptops, desktops y componentes"],
+                ["Impresion", "Impresoras, suministros y accesorios"],
+                ["Telefonia movil", "Smartphones y dispositivos"],
+                ["Almacenamiento", "Discos SSD y soluciones de respaldo"],
+                ["Licencias digitales", "Software, seguridad y productividad"],
+                ["Distribucion", "Venta mayorista y atencion empresarial"],
               ].map(([title, body]) => (
                 <div key={title} className="admin-stat-card p-4">
-                  <p className="font-display text-2xl text-ink">{title}</p>
-                  <p className="mt-2 text-xs uppercase tracking-[0.18em] text-slate/60">{body}</p>
+                  <p className="font-display text-lg text-ink">{title}</p>
+                  <p className="mt-2 text-xs leading-5 text-slate/60">{body}</p>
                 </div>
               ))}
             </div>
@@ -80,12 +83,12 @@ export default function LoginPage() {
             </div>
             <div>
               <p className="text-xs uppercase tracking-[0.32em] text-slate/50">Dismal</p>
-              <p className="font-display text-2xl leading-none text-ink">Acceso al panel</p>
+              <p className="font-display text-2xl leading-none text-ink">Gestion de la importadora</p>
             </div>
           </div>
           <h1 className="font-display text-4xl leading-none text-ink">Iniciar sesion</h1>
           <p className="mt-3 text-sm leading-6 text-slate/75">
-            Ingresa con tu usuario ADMIN, MANAGER u OPERATOR para continuar con la operacion.
+            Ingresa con tu usuario autorizado para gestionar productos fisicos, licencias, ventas y clientes.
           </p>
           <form onSubmit={handleSubmit} className="mt-8 space-y-4">
             <label className="block text-sm font-medium text-slate/80">
@@ -99,7 +102,7 @@ export default function LoginPage() {
               />
             </label>
             <label className="block text-sm font-medium text-slate/80">
-              Password
+              Contraseña
               <input
                 type="password"
                 required

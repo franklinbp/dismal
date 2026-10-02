@@ -3,7 +3,7 @@ import ThemeInitializer from "@/components/ThemeInitializer";
 
 export const metadata = {
   title: "Dismal",
-  description: "Dismal: plataforma para ventas de licencias digitales y productos digitales.",
+  description: "Dismal Distribuciones: importadora ecuatoriana de computadoras, impresoras, telefonia movil, almacenamiento y licencias digitales.",
   icons: {
     icon: [
       { url: "/favicon.ico" },
@@ -22,7 +22,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body>
         <ThemeInitializer />
         {children}

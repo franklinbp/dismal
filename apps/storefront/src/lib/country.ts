@@ -27,52 +27,24 @@ const countries: Record<CountryCode, CountryConfig> = {
   EC: {
     code: "EC",
     name: "Ecuador",
-    domain: "www.dismal.net",
+    domain: "dismalec.com",
     currency: "USD",
     locale: "es-EC",
-    contactEmail: "admin@dismal.net",
+    contactEmail: "admin@dismal.vip",
     supportPhone: "Soporte por WhatsApp",
     whatsappNumber: (import.meta.env.VITE_WHATSAPP_EC || "").replace(/\D/g, ""),
     telegramHandle: normalizeTelegramHandle(import.meta.env.VITE_TELEGRAM_EC),
-    headline: "Tienda digital para Ecuador",
-    paymentMethods: ["Pago sujeto a confirmación", "Entrega digital"]
-  },
-  PE: {
-    code: "PE",
-    name: "Perú",
-    domain: "www.dismal.net.pe",
-    currency: "PEN",
-    locale: "es-PE",
-    contactEmail: "admin@dismal.net.pe",
-    supportPhone: "Soporte por WhatsApp",
-    whatsappNumber: (import.meta.env.VITE_WHATSAPP_PE || "").replace(/\D/g, ""),
-    telegramHandle: normalizeTelegramHandle(import.meta.env.VITE_TELEGRAM_PE),
-    headline: "Tienda digital para Perú",
-    paymentMethods: ["Pago sujeto a confirmación", "Entrega digital"]
+    headline: "Productos físicos y digitales para Ecuador",
+    paymentMethods: ["Pago sujeto a confirmación", "Entrega física o digital"]
   }
 };
 
-export function resolveCountry(hostname = window.location.hostname): CountryConfig {
-  if (import.meta.env.VITE_DISMAL_DEFAULT_COUNTRY === "EC" || import.meta.env.VITE_DISMAL_DEFAULT_COUNTRY === "PE") {
-    return countries[import.meta.env.VITE_DISMAL_DEFAULT_COUNTRY];
-  }
-
-  if (import.meta.env.MODE === "peru") {
-    return countries.PE;
-  }
-  if (import.meta.env.MODE === "ecuador") {
-    return countries.EC;
-  }
-
-  const host = hostname.toLowerCase();
-  if (host.endsWith(".pe") || host.includes("dismal.net.pe")) {
-    return countries.PE;
-  }
+export function resolveCountry(_hostname = window.location.hostname): CountryConfig {
   return countries.EC;
 }
 
-export function getCountry(code: CountryCode): CountryConfig {
-  return countries[code];
+export function getCountry(_code: string): CountryConfig {
+  return countries.EC;
 }
 
 export function formatMoney(value: number, country: CountryConfig): string {
@@ -96,9 +68,6 @@ export function formatContactPhone(country: CountryConfig): string {
   const digits = country.whatsappNumber;
   if (country.code === "EC" && /^593\d{9}$/.test(digits)) {
     return `+593 ${digits.slice(3, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
-  }
-  if (country.code === "PE" && /^51\d{9}$/.test(digits)) {
-    return `+51 ${digits.slice(2, 5)} ${digits.slice(5, 8)} ${digits.slice(8)}`;
   }
   return digits ? `+${digits}` : "WhatsApp";
 }

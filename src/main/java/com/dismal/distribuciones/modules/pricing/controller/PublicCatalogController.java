@@ -11,6 +11,7 @@ import com.dismal.distribuciones.modules.security.customer.service.CustomerMarke
 import com.dismal.distribuciones.modules.storefront.domain.StorefrontCountry;
 import com.dismal.distribuciones.modules.store.domain.Software;
 import com.dismal.distribuciones.modules.store.repository.SoftwareRepository;
+import com.dismal.distribuciones.modules.store.repository.LicenseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
@@ -33,6 +34,7 @@ import java.util.UUID;
 public class PublicCatalogController {
 
     private final SoftwareRepository softwareRepository;
+    private final LicenseRepository licenseRepository;
     private final UserRepository userRepository;
     private final PricingService pricingService;
     private final CustomerMarketService customerMarketService;
@@ -74,12 +76,21 @@ public class PublicCatalogController {
                 : null;
         BigDecimal effectivePrice = wholesalePrice != null ? wholesalePrice : finalPrice;
         PriceListType priceType = PriceListType.from(countryCode, effectiveCustomerType);
+        boolean physicalProduct = Boolean.TRUE.equals(software.getPhysicalProduct());
+        int availableQuantity = physicalProduct
+                ? Math.max(0, valueOrZero(software.getStockQuantity()) - valueOrZero(software.getReservedQuantity()))
+                : Math.toIntExact(Math.min(Integer.MAX_VALUE, licenseRepository.countAvailableActivations(software.getId())));
         return new PublicProductResponse(
                 software.getId(),
                 software.getName(),
                 software.getDescription() != null ? software.getDescription() : "",
                 software.getPlatform(),
                 software.getImageUrl(),
+                software.getSku(),
+                software.getBrand(),
+                physicalProduct,
+                availableQuantity,
+                availableQuantity > 0,
                 publicPrice,
                 effectivePrice,
                 finalPrice,
@@ -93,10 +104,11 @@ public class PublicCatalogController {
             return "EC";
         }
         String normalized = country.trim().toUpperCase(Locale.ROOT);
-        if (!normalized.equals("EC") && !normalized.equals("PE")) {
-            return "EC";
-        }
-        return normalized;
+        return normalized.equals("PE") ? "PE" : "EC";
+    }
+
+    private int valueOrZero(Integer value) {
+        return value != null ? value : 0;
     }
 
     private CustomerType resolveEffectiveCustomerType(User customer, String countryCode) {

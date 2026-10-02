@@ -21,8 +21,8 @@ WORKDIR /app
 # Create a non-privileged user and group
 RUN addgroup -S appgroup && adduser -S appuser -G appgroup
 
-# Copy the application JAR and set permissions
-COPY --from=build --chown=appuser:appgroup /workspace/target/Dismal-0.0.1-SNAPSHOT.jar /app/app.jar
+# Copy the executable Spring Boot JAR without coupling the image to the Maven artifact name.
+COPY --from=build --chown=appuser:appgroup /workspace/target/*.jar /app/app.jar
 
 # Switch to the non-privileged user
 USER appuser
