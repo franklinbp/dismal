@@ -1,0 +1,45 @@
+### 1. LOGIN (Esto guardará el token automáticamente en la memoria de IntelliJ)
+POST http://localhost:8080/api/v1/auth/authenticate
+Content-Type: application/json
+
+{
+  "email": "test@dismal.net",
+  "password": "password456"
+}
+
+> {% client.global.set("auth_token", response.body.token); %}
+
+### 2. CREAR PRODUCTO (Windows 11 Pro)
+POST http://localhost:8080/api/v1/store/product
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "name": "Windows 11 Pro",
+  "description": "Licencia Retail Original para 1 PC",
+  "price": 25.50,
+  "platform": "PC",
+  "imageUrl": "https://example.com/win11.jpg"
+}
+
+> {% client.global.set("product_id", response.body.id); %}
+
+### 3. VER TODOS LOS PRODUCTOS
+GET http://localhost:8080/api/v1/store/products
+Authorization: Bearer {{auth_token}}
+### 4. CREAR META FINANCIERA (Para Windows 11)
+POST http://localhost:8080/api/v1/store/goals
+Authorization: Bearer {{auth_token}}
+Content-Type: application/json
+
+{
+  "softwareId": "{{product_id}}",
+  "targetUnits": 1000,
+  "variableCost": 5.00,
+  "fixedCosts": 300.00,
+  "deadline": "2025-12-31"
+}
+
+### 5. VER METAS (Y ver si calculó el Punto de Equilibrio)
+GET http://localhost:8080/api/v1/store/goals?softwareId={{product_id}}
+Authorization: Bearer {{auth_token}}

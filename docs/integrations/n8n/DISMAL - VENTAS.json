@@ -1,0 +1,560 @@
+{
+    "name":  "DISMAL - Reporte Ejecutivo Completo Telegram",
+    "nodes":  [
+                  {
+                      "parameters":  {
+                                         "keepOnlySet":  true,
+                                         "values":  {
+                                                        "string":  [
+                                                                       {
+                                                                           "name":  "baseUrl",
+                                                                           "value":  "http://dismal.vip:9001"
+                                                                       },
+                                                                       {
+                                                                           "name":  "email",
+                                                                           "value":  "REEMPLAZAR_EMAIL"
+                                                                       },
+                                                                       {
+                                                                           "name":  "password",
+                                                                           "value":  "REEMPLAZAR_PASSWORD"
+                                                                       },
+                                                                       {
+                                                                           "name":  "startDate",
+                                                                           "value":  "2026-04-01T00:00:00"
+                                                                       },
+                                                                       {
+                                                                           "name":  "endDate",
+                                                                           "value":  "2026-04-30T23:59:59"
+                                                                       },
+                                                                       {
+                                                                           "name":  "period",
+                                                                           "value":  "month"
+                                                                       },
+                                                                       {
+                                                                           "name":  "telegramBotToken",
+                                                                           "value":  "8312371373:AAFJhRxsuE09St9p0hd-TEy8G0PpVMubtCg"
+                                                                       },
+                                                                       {
+                                                                           "name":  "telegramChatId",
+                                                                           "value":  "6395017830"
+                                                                       },
+                                                                       {
+                                                                           "name":  "todayDate",
+                                                                           "value":  "={{$now.toFormat(\u0027yyyy-LL-dd\u0027)}}"
+                                                                       },
+                                                                       {
+                                                                           "name":  "startOfMonthDate",
+                                                                           "value":  "={{$now.startOf(\u0027month\u0027).toFormat(\u0027yyyy-LL-dd\u0027)}}"
+                                                                       },
+                                                                       {
+                                                                           "name":  "currentYear",
+                                                                           "value":  "={{$now.toFormat(\u0027yyyy\u0027)}}"
+                                                                       }
+                                                                   ]
+                                                    },
+                                         "options":  {
+                                                         "dotNotation":  false
+                                                     }
+                                     },
+                      "id":  "e9491990-99b2-4b43-a1d9-dbfa5c343616",
+                      "name":  "Config",
+                      "type":  "n8n-nodes-base.set",
+                      "typeVersion":  2,
+                      "position":  [
+                                       -1980,
+                                       300
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "={{ $json.baseUrl + \u0027/api/v1/auth/authenticate\u0027 }}",
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={{ ({ email: $json.email, password: $json.password }) }}",
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "57256c9f-0a74-4c6d-9ec8-c51ffe67d7ff",
+                      "name":  "Authenticate",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       -1760,
+                                       300
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "rule":  {
+                                                      "interval":  [
+                                                                       {
+                                                                           "field":  "cronExpression",
+                                                                           "expression":  "0 7 * * *"
+                                                                       },
+                                                                       {
+                                                                           "field":  "cronExpression",
+                                                                           "expression":  "0 10 * * *"
+                                                                       }
+                                                                   ]
+                                                  }
+                                     },
+                      "id":  "37240237-2c29-4ad7-80b7-99be8569e01f",
+                      "name":  "Schedule 07:00 and 10:00",
+                      "type":  "n8n-nodes-base.scheduleTrigger",
+                      "typeVersion":  1.2,
+                      "position":  [
+                                       -2200,
+                                       300
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $(\u0027Config\u0027).first().json.baseUrl + \u0027/api/v1/dashboard/admin/summary\u0027 }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{$(\u0027Authenticate\u0027).first().json.token}}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "5e1b01fe-9d0a-49c5-8a23-88af32735ad1",
+                      "name":  "Get Dashboard Summary",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       -1540,
+                                       300
+                                   ],
+                      "onError":  "continueRegularOutput",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $(\u0027Config\u0027).first().json.baseUrl + \u0027/api/v1/reports/sales/daily\u0027 }}",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "from",
+                                                                                        "value":  "={{ $(\u0027Config\u0027).first().json.todayDate }}"
+                                                                                    },
+                                                                                    {
+                                                                                        "name":  "to",
+                                                                                        "value":  "={{ $(\u0027Config\u0027).first().json.todayDate }}"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{$(\u0027Authenticate\u0027).first().json.token}}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "3d69c9a0-21ec-4365-bfc3-fb7aaef81732",
+                      "name":  "Get Daily Sales",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       -1320,
+                                       300
+                                   ],
+                      "onError":  "continueRegularOutput",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $(\u0027Config\u0027).first().json.baseUrl + \u0027/api/v1/reports/sales/monthly\u0027 }}",
+                                         "sendQuery":  true,
+                                         "queryParameters":  {
+                                                                 "parameters":  [
+                                                                                    {
+                                                                                        "name":  "year",
+                                                                                        "value":  "={{ $(\u0027Config\u0027).first().json.currentYear }}"
+                                                                                    }
+                                                                                ]
+                                                             },
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{$(\u0027Authenticate\u0027).first().json.token}}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "d970a559-a314-4d49-ad17-1af4bdf72cf5",
+                      "name":  "Get Monthly Sales",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       -1100,
+                                       300
+                                   ],
+                      "onError":  "continueRegularOutput",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $(\u0027Config\u0027).first().json.baseUrl + \u0027/api/v1/sales-targets/summary\u0027 }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{$(\u0027Authenticate\u0027).first().json.token}}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "d64ce3ea-3cd7-48c2-9b3b-2db4ad7bce56",
+                      "name":  "Get Targets Summary",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       -880,
+                                       300
+                                   ],
+                      "onError":  "continueRegularOutput",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $(\u0027Config\u0027).first().json.baseUrl + \u0027/api/v1/sales-targets\u0027 }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{$(\u0027Authenticate\u0027).first().json.token}}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "3de0c7e3-f35b-4f35-9cf3-29f9afda20e3",
+                      "name":  "Get Targets Detail",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       -660,
+                                       300
+                                   ],
+                      "onError":  "continueRegularOutput",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $(\u0027Config\u0027).first().json.baseUrl + \u0027/api/v1/ar\u0027 }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{$(\u0027Authenticate\u0027).first().json.token}}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "e5652ea5-81db-45b2-912c-20223fc7abd9",
+                      "name":  "Get Accounts Receivable",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       -220,
+                                       300
+                                   ],
+                      "onError":  "continueRegularOutput",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $(\u0027Config\u0027).first().json.baseUrl + \u0027/api/v1/expenses\u0027 }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{$(\u0027Authenticate\u0027).first().json.token}}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "ad3e9269-d4e3-4304-b3b6-d9db73ad6cdd",
+                      "name":  "Get Expenses",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       0,
+                                       300
+                                   ],
+                      "onError":  "continueRegularOutput",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "jsCode":  "const cfg = $(\u0027Config\u0027).first().json;\n\nfunction icon(hex) {\n  return String.fromCodePoint(parseInt(hex, 16));\n}\n\nconst I = {\n  chart: icon(\u00271F4CA\u0027), money: icon(\u00271F4B0\u0027), target: icon(\u00271F3AF\u0027), rocket: icon(\u00271F680\u0027),\n  card: icon(\u00271F4B3\u0027), cash: icon(\u00271F4B8\u0027), warning: String.fromCodePoint(0x26A0, 0xFE0F),\n  red: icon(\u00271F534\u0027), yellow: icon(\u00271F7E1\u0027), green: icon(\u00271F7E2\u0027), fire: icon(\u00271F525\u0027),\n  snow: icon(\u00271F9CA\u0027), clock: String.fromCodePoint(0x23F1, 0xFE0F), trophy: icon(\u00271F3C6\u0027),\n  calendar: icon(\u00271F4C5\u0027), search: icon(\u00271F50E\u0027), pin: icon(\u00271F4CC\u0027), check: icon(\u00272705\u0027),\n};\n\nfunction safeNodeJson(name) {\n  try {\n    const all = $(name).all();\n    if (all.length \u003e 1) return all.map((item) =\u003e item.json);\n    return all[0]?.json ?? {};\n  } catch (error) {\n    return {};\n  }\n}\n\nfunction asArray(value) {\n  if (Array.isArray(value)) return value;\n  if (!value || typeof value !== \u0027object\u0027) return [];\n  if (Array.isArray(value.items)) return value.items;\n  if (Array.isArray(value.data)) return value.data;\n  if (Array.isArray(value.points)) return value.points;\n  if (Array.isArray(value.alerts)) return value.alerts;\n  if (Array.isArray(value.content)) return value.content;\n  const keys = Object.keys(value);\n  if (keys.length \u0026\u0026 keys.every((key) =\u003e /^\\d+$/.test(key))) {\n    return keys.sort((a, b) =\u003e Number(a) - Number(b)).map((key) =\u003e value[key]);\n  }\n  return [];\n}\n\nfunction toNumber(value) {\n  const num = Number(value ?? 0);\n  return Number.isFinite(num) ? num : 0;\n}\n\nfunction money(value) {\n  return \u0027$\u0027 + toNumber(value).toLocaleString(\u0027en-US\u0027, { minimumFractionDigits: 2, maximumFractionDigits: 2 });\n}\n\nfunction percent(value) {\n  return toNumber(value).toFixed(1) + \u0027%\u0027;\n}\n\nfunction shortId(value) {\n  return String(value || \u0027\u0027).slice(0, 8) || \u0027s/id\u0027;\n}\n\nfunction periodTotal(raw) {\n  if (raw \u0026\u0026 typeof raw === \u0027object\u0027 \u0026\u0026 raw.totalAmount != null) return toNumber(raw.totalAmount);\n  return asArray(raw?.points).reduce((sum, point) =\u003e sum + toNumber(point.total), 0);\n}\n\nfunction periodCount(raw) {\n  if (raw \u0026\u0026 typeof raw === \u0027object\u0027 \u0026\u0026 raw.totalCount != null) return toNumber(raw.totalCount);\n  return asArray(raw?.points).reduce((sum, point) =\u003e sum + toNumber(point.count), 0);\n}\n\nfunction isoDate(date) {\n  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);\n}\n\nfunction dueDateForCurrentMonth(dueDay, baseDate) {\n  if (!dueDay || dueDay \u003c 1) return null;\n  const lastDay = new Date(baseDate.getFullYear(), baseDate.getMonth() + 1, 0).getDate();\n  return new Date(baseDate.getFullYear(), baseDate.getMonth(), Math.min(dueDay, lastDay));\n}\n\nfunction lines(items, formatter, emptyText, limit = 5) {\n  const selected = items.slice(0, limit).map(formatter);\n  return selected.length ? selected.join(\u0027\\n\u0027) : emptyText;\n}\n\nfunction statusForRatio(ratio, expected) {\n  if (ratio \u003e= expected) return { icon: I.green, text: \u0027En ritmo\u0027 };\n  if (ratio \u003e= expected * 0.75) return { icon: I.yellow, text: \u0027Levemente bajo\u0027 };\n  return { icon: I.red, text: \u0027Bajo el ritmo esperado\u0027 };\n}\n\nconst dashboard = safeNodeJson(\u0027Get Dashboard Summary\u0027);\nconst dailySales = safeNodeJson(\u0027Get Daily Sales\u0027);\nconst monthlySales = safeNodeJson(\u0027Get Monthly Sales\u0027);\nconst targetsSummary = safeNodeJson(\u0027Get Targets Summary\u0027);\nconst targets = asArray(safeNodeJson(\u0027Get Targets Detail\u0027));\nconst inventoryAlerts = asArray(safeNodeJson(\u0027Get Inventory Alerts\u0027));\nconst arItems = asArray(safeNodeJson(\u0027Get Accounts Receivable\u0027));\nconst expenses = asArray(safeNodeJson(\u0027Get Expenses\u0027)).filter((item) =\u003e item.active !== false);\n\nconst todayIso = cfg.todayDate || isoDate(new Date());\nconst now = new Date(todayIso + \u0027T00:00:00\u0027);\nconst currentHour = new Date().getHours();\nconst isTenCut = currentHour \u003e= 10;\nconst reportTitle = isTenCut ? \u0027CORTE COMERCIAL 10:00\u0027 : \u0027REPORTE EJECUTIVO DIARIO\u0027;\nconst dayOfMonth = now.getDate();\nconst daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();\nconst expectedPercentToday = daysInMonth \u003e 0 ? (dayOfMonth / daysInMonth) * 100 : 0;\n\nconst todaySalesAmount = periodTotal(dailySales) || toNumber(dashboard.todaySalesAmount);\nconst todaySalesCount = periodCount(dailySales) || toNumber(dashboard.todaySalesCount);\nconst monthSalesAmount = periodTotal(monthlySales) || toNumber(dashboard.monthSalesAmount);\nconst monthSalesCount = periodCount(monthlySales) || toNumber(dashboard.monthSalesCount);\nconst todayProfitAmount = toNumber(dashboard.todayProfitAmount);\nconst monthProfitAmount = toNumber(dashboard.monthProfitAmount);\nconst avgTicketToday = todaySalesCount \u003e 0 ? todaySalesAmount / todaySalesCount : 0;\nconst avgTicketMonth = monthSalesCount \u003e 0 ? monthSalesAmount / monthSalesCount : 0;\nconst projectedClose = dayOfMonth \u003e 0 ? (monthSalesAmount / dayOfMonth) * daysInMonth : monthSalesAmount;\n\nconst totalTargets = toNumber(targetsSummary.totalTargets || targets.length);\nconst achievedTargets = toNumber(targetsSummary.achievedTargets || targets.filter((item) =\u003e item.targetAchieved).length);\nconst pendingTargets = toNumber(targetsSummary.pendingTargets || Math.max(totalTargets - achievedTargets, 0));\nconst totalMetaUnits = toNumber(targetsSummary.totalMetaUnits || targets.reduce((sum, item) =\u003e sum + toNumber(item.metaUnits), 0));\nconst totalTargetRevenue = toNumber(targetsSummary.totalTargetRevenue || targets.reduce((sum, item) =\u003e sum + toNumber(item.targetRevenue), 0));\nconst totalContribution = toNumber(targetsSummary.totalContribution || targets.reduce((sum, item) =\u003e sum + toNumber(item.contributionTotal), 0));\nconst totalFixedCost = toNumber(targetsSummary.totalFixedCost || targets.reduce((sum, item) =\u003e sum + toNumber(item.fixedCostApplied), 0));\nconst totalExpectedProfit = toNumber(targetsSummary.totalExpectedProfit || targets.reduce((sum, item) =\u003e sum + toNumber(item.expectedProfit), 0));\nconst unitsSold = targets.reduce((sum, item) =\u003e sum + toNumber(item.unitsSoldCurrent), 0);\nconst progressPercent = totalTargetRevenue \u003e 0 ? (monthSalesAmount / totalTargetRevenue) * 100 : 0;\nconst unitProgressPercent = totalMetaUnits \u003e 0 ? (unitsSold / totalMetaUnits) * 100 : 0;\nconst remainingToGoal = Math.max(totalTargetRevenue - monthSalesAmount, 0);\nconst requiredDailyAvg = daysInMonth \u003e dayOfMonth ? remainingToGoal / (daysInMonth - dayOfMonth) : remainingToGoal;\nconst targetStatus = statusForRatio(progressPercent, expectedPercentToday);\n\nconst targetRows = targets.map((item) =\u003e {\n  const metaUnits = toNumber(item.metaUnits);\n  const sold = toNumber(item.unitsSoldCurrent);\n  const missing = Math.max(metaUnits - sold, 0);\n  const targetRevenue = toNumber(item.targetRevenue || toNumber(item.salePrice) * metaUnits);\n  const progress = metaUnits \u003e 0 ? (sold / metaUnits) * 100 : 0;\n  return {\n    name: item.softwareName || \u0027Producto\u0027,\n    country: item.countryCode || \u0027\u0027,\n    type: item.customerType || \u0027\u0027,\n    metaUnits,\n    sold,\n    missing,\n    price: toNumber(item.salePrice),\n    targetRevenue,\n    expectedProfit: toNumber(item.expectedProfit),\n    deadline: item.deadline || \u0027s/f\u0027,\n    achieved: Boolean(item.targetAchieved),\n    progress,\n  };\n});\n\nconst topProgress = targetRows.filter((item) =\u003e item.sold \u003e 0).sort((a, b) =\u003e b.sold - a.sold);\nconst pushByRevenue = targetRows.filter((item) =\u003e !item.achieved).sort((a, b) =\u003e b.targetRevenue - a.targetRevenue);\nconst criticalTargets = targetRows\n  .filter((item) =\u003e !item.achieved \u0026\u0026 item.progress \u003c expectedPercentToday)\n  .sort((a, b) =\u003e (a.progress - b.progress) || (b.targetRevenue - a.targetRevenue));\n\nconst coldProducts = inventoryAlerts.map((item) =\u003e item.name || item.softwareName || \u0027Producto\u0027);\n\nconst overdueAr = arItems.filter((item) =\u003e String(item.status || \u0027\u0027).toUpperCase() === \u0027OVERDUE\u0027);\nconst openAr = arItems.filter((item) =\u003e [\u0027OPEN\u0027, \u0027PARTIAL\u0027].includes(String(item.status || \u0027\u0027).toUpperCase()));\nconst overdueArTotal = overdueAr.reduce((sum, item) =\u003e sum + toNumber(item.balance), 0);\nconst openArTotal = openAr.reduce((sum, item) =\u003e sum + toNumber(item.balance), 0);\n\nconst next3Date = new Date(now);\nnext3Date.setDate(next3Date.getDate() + 3);\nconst next3Iso = isoDate(next3Date);\nconst expenseSchedule = expenses\n  .map((item) =\u003e {\n    const dueDate = dueDateForCurrentMonth(toNumber(item.dueDay), now);\n    return {\n      name: (item.name || \u0027Gasto\u0027).trim(),\n      category: item.category || \u0027\u0027,\n      amount: toNumber(item.monthlyAmount ?? item.totalAmount),\n      dueDay: toNumber(item.dueDay),\n      priority: item.priority || \u0027\u0027,\n      dueDateIso: dueDate ? isoDate(dueDate) : null,\n    };\n  })\n  .filter((item) =\u003e item.dueDateIso);\n\nconst dueTodayExpenses = expenseSchedule.filter((item) =\u003e item.dueDateIso === todayIso);\nconst overdueExpenses = expenseSchedule.filter((item) =\u003e item.dueDateIso \u003c todayIso);\nconst nextExpenses = expenseSchedule.filter((item) =\u003e item.dueDateIso \u003e todayIso \u0026\u0026 item.dueDateIso \u003c= next3Iso);\nconst dueTodayExpensesTotal = dueTodayExpenses.reduce((sum, item) =\u003e sum + item.amount, 0);\nconst overdueExpensesTotal = overdueExpenses.reduce((sum, item) =\u003e sum + item.amount, 0);\nconst nextExpensesTotal = nextExpenses.reduce((sum, item) =\u003e sum + item.amount, 0);\n\nlet globalIcon = I.green;\nlet globalStatus = \u0027Operaci�n estable\u0027;\nconst alerts = [];\nif (overdueArTotal \u003e 0) alerts.push(`${I.red} Cartera vencida: ${money(overdueArTotal)}`);\nif (overdueExpensesTotal \u003e 0) alerts.push(`${I.red} Gastos vencidos: ${money(overdueExpensesTotal)}`);\nif (targetStatus.icon !== I.green) alerts.push(`${targetStatus.icon} Meta mensual: ${targetStatus.text}`);\nif (todaySalesAmount \u003c= 0) alerts.push(`${I.yellow} Sin ventas registradas hoy`);\nif (alerts.some((item) =\u003e item.startsWith(I.red))) {\n  globalIcon = I.red;\n  globalStatus = \u0027Atenci�n financiera\u0027;\n} else if (alerts.length \u003e 0) {\n  globalIcon = I.yellow;\n  globalStatus = \u0027Seguimiento requerido\u0027;\n}\n\nconst actionPlan = [];\nif (overdueArTotal \u003e 0) actionPlan.push(\u0027Cobrar cartera vencida antes de nuevas compras fuertes.\u0027);\nif (overdueExpensesTotal \u003e 0) actionPlan.push(\u0027Regularizar gastos vencidos o priorizar caja.\u0027);\nif (remainingToGoal \u003e 0) actionPlan.push(`Para cerrar meta, vender aprox. ${money(requiredDailyAvg)} diarios el resto del mes.`);\nif (criticalTargets.length \u003e 0) actionPlan.push(`Empujar primero: ${criticalTargets[0].name}.`);\nif (actionPlan.length === 0) actionPlan.push(\u0027Mantener ritmo comercial y seguimiento de metas abiertas.\u0027);\n\nconst summaryBlock =\n`${I.chart} \u003cb\u003e${reportTitle}\u003c/b\u003e\\n` +\n`${I.calendar} Fecha: \u003cb\u003e${todayIso}\u003c/b\u003e\\n` +\n`Estado: \u003cb\u003e${globalIcon} ${globalStatus}\u003c/b\u003e\\n` +\n`Ritmo meta: \u003cb\u003e${targetStatus.icon} ${targetStatus.text}\u003c/b\u003e\\n`;\n\nconst salesBlock =\n`${I.money} \u003cb\u003eVENTAS\u003c/b\u003e\\n` +\n`Hoy: \u003cb\u003e${money(todaySalesAmount)}\u003c/b\u003e (${todaySalesCount} ventas)\\n` +\n`Ticket prom. hoy: \u003cb\u003e${money(avgTicketToday)}\u003c/b\u003e\\n` +\n`Mes: \u003cb\u003e${money(monthSalesAmount)}\u003c/b\u003e (${monthSalesCount} ventas)\\n` +\n`Ticket prom. mes: \u003cb\u003e${money(avgTicketMonth)}\u003c/b\u003e\\n` +\n`Utilidad hoy: \u003cb\u003e${money(todayProfitAmount)}\u003c/b\u003e\\n` +\n`Utilidad mes: \u003cb\u003e${money(monthProfitAmount)}\u003c/b\u003e\\n` +\n`Proyecci�n cierre: \u003cb\u003e${money(projectedClose)}\u003c/b\u003e\\n`;\n\nconst targetsBlock =\n`${I.target} \u003cb\u003eMETAS ACTIVAS\u003c/b\u003e\\n` +\n`Meta ingresos: \u003cb\u003e${money(totalTargetRevenue)}\u003c/b\u003e\\n` +\n`Vendido vs meta: \u003cb\u003e${money(monthSalesAmount)}\u003c/b\u003e / \u003cb\u003e${money(totalTargetRevenue)}\u003c/b\u003e\\n` +\n`Avance ingresos: \u003cb\u003e${percent(progressPercent)}\u003c/b\u003e | esperado: \u003cb\u003e${percent(expectedPercentToday)}\u003c/b\u003e\\n` +\n`Faltante: \u003cb\u003e${money(remainingToGoal)}\u003c/b\u003e\\n` +\n`Necesario diario: \u003cb\u003e${money(requiredDailyAvg)}\u003c/b\u003e\\n` +\n`Unidades: \u003cb\u003e${unitsSold}/${totalMetaUnits}\u003c/b\u003e (${percent(unitProgressPercent)})\\n` +\n`Metas logradas: \u003cb\u003e${achievedTargets}/${totalTargets}\u003c/b\u003e | pendientes: \u003cb\u003e${pendingTargets}\u003c/b\u003e\\n` +\n`Contribuci�n: \u003cb\u003e${money(totalContribution)}\u003c/b\u003e\\n` +\n`Costos fijos: \u003cb\u003e${money(totalFixedCost)}\u003c/b\u003e\\n` +\n`Utilidad esperada: \u003cb\u003e${money(totalExpectedProfit)}\u003c/b\u003e\\n`;\n\nconst progressLines = lines(topProgress, (item, index) =\u003e\n  `${index + 1}. ${item.name}: ${item.sold}/${item.metaUnits} und. (${percent(item.progress)})`,\n  \u0027Sin productos con avance registrado\u0027\n);\nconst criticalLines = lines(criticalTargets, (item, index) =\u003e\n  `${index + 1}. ${item.name}: faltan ${item.missing} und. | ${percent(item.progress)} | vence ${item.deadline}`,\n  \u0027Sin metas cr�ticas por debajo del ritmo\u0027\n);\nconst pushLines = lines(pushByRevenue, (item, index) =\u003e\n  `${index + 1}. ${item.name}: meta ${money(item.targetRevenue)} | faltan ${item.missing} und. | precio ${money(item.price)}`,\n  \u0027Sin metas pendientes\u0027\n);\nconst coldLines = lines(coldProducts, (name) =\u003e `- ${name}`, \u0027Sin productos fr�os\u0027);\nconst alertLines = alerts.length ? alerts.join(\u0027\\n\u0027) : `${I.check} Sin alertas cr�ticas`;\nconst actionLines = actionPlan.map((item, index) =\u003e `${index + 1}. ${item}`).join(\u0027\\n\u0027);\n\nconst arLines = lines(overdueAr, (item) =\u003e\n  `- Venta ${shortId(item.saleId)}: ${money(item.balance)} | vence ${item.dueDate || \u0027s/f\u0027}`,\n  \u0027Sin cartera vencida\u0027\n);\nconst expensesTodayLines = lines(dueTodayExpenses, (item) =\u003e `- ${item.name}: ${money(item.amount)}`, \u0027Sin pagos hoy\u0027);\nconst expensesOverdueLines = lines(overdueExpenses, (item) =\u003e `- ${item.name}: ${money(item.amount)} | d�a ${item.dueDay}`, \u0027Sin gastos vencidos\u0027);\nconst expensesNextLines = lines(nextExpenses, (item) =\u003e `- ${item.name}: ${money(item.amount)} | ${item.dueDateIso}`, \u0027Sin pagos pr�ximos\u0027);\n\nconst message =\n`${summaryBlock}\\n` +\n`${salesBlock}\\n` +\n`${targetsBlock}\\n` +\n`${I.trophy} \u003cb\u003eTOP AVANCE\u003c/b\u003e\\n${progressLines}\\n\\n` +\n`${I.warning} \u003cb\u003eMETAS CR�TICAS\u003c/b\u003e\\n${criticalLines}\\n\\n` +\n`${I.rocket} \u003cb\u003eMETAS A EMPUJAR POR INGRESO\u003c/b\u003e\\n${pushLines}\\n\\n` +\n`${I.snow} \u003cb\u003ePRODUCTOS FR�OS\u003c/b\u003e\\n${coldLines}\\n\\n` +\n`${I.card} \u003cb\u003eCARTERA\u003c/b\u003e\\n` +\n`Vencida: \u003cb\u003e${money(overdueArTotal)}\u003c/b\u003e (${overdueAr.length})\\n` +\n`Abierta: \u003cb\u003e${money(openArTotal)}\u003c/b\u003e (${openAr.length})\\n` +\n`${arLines}\\n\\n` +\n`${I.cash} \u003cb\u003eGASTOS\u003c/b\u003e\\n` +\n`Hoy: \u003cb\u003e${money(dueTodayExpensesTotal)}\u003c/b\u003e\\n${expensesTodayLines}\\n\\n` +\n`Vencidos: \u003cb\u003e${money(overdueExpensesTotal)}\u003c/b\u003e\\n${expensesOverdueLines}\\n\\n` +\n`Pr�ximos 3 d�as: \u003cb\u003e${money(nextExpensesTotal)}\u003c/b\u003e\\n${expensesNextLines}\\n\\n` +\n`${I.search} \u003cb\u003eALERTAS\u003c/b\u003e\\n${alertLines}\\n\\n` +\n`${I.pin} \u003cb\u003ePLAN DE ACCI�N\u003c/b\u003e\\n${actionLines}`;\n\nreturn [{\n  json: {\n    message,\n    globalStatus,\n    todaySalesAmount,\n    monthSalesAmount,\n    totalTargetRevenue,\n    progressPercent,\n    expectedPercentToday,\n    remainingToGoal,\n    requiredDailyAvg,\n    unitsSold,\n    totalMetaUnits,\n    overdueArTotal,\n    overdueExpensesTotal,\n    nextExpensesTotal,\n  }\n}];"
+                                     },
+                      "id":  "a426e8ed-16cd-4e61-ab6b-3aa06962a466",
+                      "name":  "Build Telegram Report",
+                      "type":  "n8n-nodes-base.code",
+                      "typeVersion":  2,
+                      "position":  [
+                                       240,
+                                       300
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+                                         "url":  "={{ $(\u0027Config\u0027).first().json.baseUrl + \u0027/api/v1/reports/inventory-alerts\u0027 }}",
+                                         "sendHeaders":  true,
+                                         "headerParameters":  {
+                                                                  "parameters":  [
+                                                                                     {
+                                                                                         "name":  "Authorization",
+                                                                                         "value":  "=Bearer {{$(\u0027Authenticate\u0027).first().json.token}}"
+                                                                                     }
+                                                                                 ]
+                                                              },
+                                         "options":  {
+
+                                                     }
+                                     },
+                      "id":  "09a1c687-3f43-45f7-a0c0-347535d286b6",
+                      "name":  "Get Inventory Alerts",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       -440,
+                                       300
+                                   ],
+                      "onError":  "continueRegularOutput",
+                      "alwaysOutputData":  true
+                  },
+                  {
+                      "parameters":  {
+                                         "method":  "POST",
+                                         "url":  "={{ \u0027https://api.telegram.org/bot\u0027 + $(\u0027Config\u0027).first().json.telegramBotToken + \u0027/sendMessage\u0027 }}",
+                                         "sendBody":  true,
+                                         "specifyBody":  "json",
+                                         "jsonBody":  "={{ ({ chat_id: $(\u0027Config\u0027).first().json.telegramChatId, text: $json.message, parse_mode: \u0027HTML\u0027, disable_web_page_preview: true }) }}",
+                                         "options":  {
+                                                         "timeout":  30000
+                                                     },
+                                         "contentType":  "json"
+                                     },
+                      "id":  "eae8ab88-83aa-4b71-ba6a-75139a7fb583",
+                      "name":  "Send Telegram",
+                      "type":  "n8n-nodes-base.httpRequest",
+                      "typeVersion":  4.2,
+                      "position":  [
+                                       500,
+                                       300
+                                   ]
+                  },
+                  {
+                      "parameters":  {
+
+                                     },
+                      "id":  "manual-test-dismal-report",
+                      "name":  "Manual Test",
+                      "type":  "n8n-nodes-base.manualTrigger",
+                      "typeVersion":  1,
+                      "position":  [
+                                       -2200,
+                                       520
+                                   ]
+                  }
+              ],
+    "pinData":  {
+
+                },
+    "connections":  {
+                        "Schedule 07:00 and 10:00":  {
+                                                         "main":  [
+                                                                      [
+                                                                          {
+                                                                              "node":  "Config",
+                                                                              "type":  "main",
+                                                                              "index":  0
+                                                                          }
+                                                                      ]
+                                                                  ]
+                                                     },
+                        "Config":  {
+                                       "main":  [
+                                                    [
+                                                        {
+                                                            "node":  "Authenticate",
+                                                            "type":  "main",
+                                                            "index":  0
+                                                        }
+                                                    ]
+                                                ]
+                                   },
+                        "Authenticate":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Get Dashboard Summary",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Get Dashboard Summary":  {
+                                                      "main":  [
+                                                                   [
+                                                                       {
+                                                                           "node":  "Get Daily Sales",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ]
+                                                               ]
+                                                  },
+                        "Get Daily Sales":  {
+                                                "main":  [
+                                                             [
+                                                                 {
+                                                                     "node":  "Get Monthly Sales",
+                                                                     "type":  "main",
+                                                                     "index":  0
+                                                                 }
+                                                             ]
+                                                         ]
+                                            },
+                        "Get Monthly Sales":  {
+                                                  "main":  [
+                                                               [
+                                                                   {
+                                                                       "node":  "Get Targets Summary",
+                                                                       "type":  "main",
+                                                                       "index":  0
+                                                                   }
+                                                               ]
+                                                           ]
+                                              },
+                        "Get Targets Summary":  {
+                                                    "main":  [
+                                                                 [
+                                                                     {
+                                                                         "node":  "Get Targets Detail",
+                                                                         "type":  "main",
+                                                                         "index":  0
+                                                                     }
+                                                                 ]
+                                                             ]
+                                                },
+                        "Get Targets Detail":  {
+                                                   "main":  [
+                                                                [
+                                                                    {
+                                                                        "node":  "Get Inventory Alerts",
+                                                                        "type":  "main",
+                                                                        "index":  0
+                                                                    }
+                                                                ]
+                                                            ]
+                                               },
+                        "Get Inventory Alerts":  {
+                                                     "main":  [
+                                                                  [
+                                                                      {
+                                                                          "node":  "Get Accounts Receivable",
+                                                                          "type":  "main",
+                                                                          "index":  0
+                                                                      }
+                                                                  ]
+                                                              ]
+                                                 },
+                        "Get Accounts Receivable":  {
+                                                        "main":  [
+                                                                     [
+                                                                         {
+                                                                             "node":  "Get Expenses",
+                                                                             "type":  "main",
+                                                                             "index":  0
+                                                                         }
+                                                                     ]
+                                                                 ]
+                                                    },
+                        "Get Expenses":  {
+                                             "main":  [
+                                                          [
+                                                              {
+                                                                  "node":  "Build Telegram Report",
+                                                                  "type":  "main",
+                                                                  "index":  0
+                                                              }
+                                                          ]
+                                                      ]
+                                         },
+                        "Build Telegram Report":  {
+                                                      "main":  [
+                                                                   [
+                                                                       {
+                                                                           "node":  "Send Telegram",
+                                                                           "type":  "main",
+                                                                           "index":  0
+                                                                       }
+                                                                   ]
+                                                               ]
+                                                  },
+                        "Manual Test":  {
+                                            "main":  [
+                                                         [
+                                                             {
+                                                                 "node":  "Config",
+                                                                 "type":  "main",
+                                                                 "index":  0
+                                                             }
+                                                         ]
+                                                     ]
+                                        }
+                    },
+    "active":  true,
+    "settings":  {
+                     "executionOrder":  "v1",
+                     "timezone":  "America/Guayaquil"
+                 },
+    "versionId":  "98612d48-d87a-4189-a5ef-5ad1e920852e",
+    "meta":  {
+                 "templateCredsSetupCompleted":  false,
+                 "description":  "Reporte ejecutivo Dismal por Telegram con ventas, metas, cartera y gastos reales del VPS."
+             },
+    "id":  "NHxZ17rKgEMBG0NB",
+    "tags":  [
+
+             ]
+}

@@ -1,0 +1,185 @@
+{
+  "name": "Dismal Sales Query",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "manual-trigger-1",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        260,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "baseUrl",
+              "value": "https://api.dismal.vip"
+            },
+            {
+              "name": "email",
+              "value": "REEMPLAZAR_EMAIL"
+            },
+            {
+              "name": "password",
+              "value": "REEMPLAZAR_PASSWORD"
+            },
+            {
+              "name": "startDate",
+              "value": "2026-04-01T00:00:00"
+            },
+            {
+              "name": "endDate",
+              "value": "2026-04-30T23:59:59"
+            },
+            {
+              "name": "period",
+              "value": "month"
+            }
+          ]
+        }
+      },
+      "id": "set-config-1",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        500,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.baseUrl + '/api/v1/auth/authenticate' }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ ({ email: $json.email, password: $json.password }) }}",
+        "options": {}
+      },
+      "id": "http-auth-1",
+      "name": "Authenticate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        760,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $item(0).$node['Config'].json.baseUrl + '/api/v1/reports/sales' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$json.token}}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "startDate",
+              "value": "={{ $item(0).$node['Config'].json.startDate }}"
+            },
+            {
+              "name": "endDate",
+              "value": "={{ $item(0).$node['Config'].json.endDate }}"
+            },
+            {
+              "name": "period",
+              "value": "={{ $item(0).$node['Config'].json.period }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "http-sales-1",
+      "name": "Get Sales Report",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1020,
+        300
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const report = $json;\nconst points = Array.isArray(report.dataPoints) ? report.dataPoints : [];\nconst normalizedPoints = points.map((point) => ({\n  label: point.label ?? point.period ?? point.date ?? '',\n  totalSales: Number(point.totalSales ?? point.total ?? 0),\n}));\nconst totalSales = normalizedPoints.reduce((sum, point) => sum + point.totalSales, 0);\nconst averageSales = normalizedPoints.length ? totalSales / normalizedPoints.length : 0;\nconst topPoint = normalizedPoints.reduce((best, point) => {\n  if (!best || point.totalSales > best.totalSales) {\n    return point;\n  }\n  return best;\n}, null);\n\nreturn [{\n  json: {\n    source: 'Dismal',\n    startDate: report.startDate,\n    endDate: report.endDate,\n    period: report.period,\n    totalBuckets: normalizedPoints.length,\n    totalSales,\n    averageSales,\n    topBucket: topPoint,\n    dataPoints: normalizedPoints,\n    rawReport: report,\n  }\n}];"
+      },
+      "id": "code-summary-1",
+      "name": "Build Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        300
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Authenticate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticate": {
+      "main": [
+        [
+          {
+            "node": "Get Sales Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Sales Report": {
+      "main": [
+        [
+          {
+            "node": "Build Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {},
+  "versionId": "c0d2f1c7-5b9a-4dfb-9f3a-1f5c8f35b1f2",
+  "meta": {
+    "templateCredsSetupCompleted": false
+  },
+  "id": "dismal-sales-query-workflow",
+  "tags": []
+}

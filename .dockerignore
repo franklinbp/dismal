@@ -1,0 +1,8 @@
+target
+.idea
+.DS_Store
+*.iml
+apps/**/node_modules
+apps/**/.next
+apps/android/**/build
+apps/desktop/**/target

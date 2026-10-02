@@ -1,0 +1,604 @@
+{
+  "name": "DISMAL - Morning Telegram Real Data",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 7 * * *"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0001",
+      "name": "Morning Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "baseUrl",
+              "value": "https://api.dismal.vip"
+            },
+            {
+              "name": "email",
+              "value": "REEMPLAZAR_ADMIN_EMAIL"
+            },
+            {
+              "name": "password",
+              "value": "REEMPLAZAR_ADMIN_PASSWORD"
+            },
+            {
+              "name": "telegramBotToken",
+              "value": "REEMPLAZAR_BOT_TOKEN"
+            },
+            {
+              "name": "telegramChatId",
+              "value": "REEMPLAZAR_CHAT_ID"
+            },
+            {
+              "name": "todayDate",
+              "value": "={{ $now.toFormat('yyyy-LL-dd') }}"
+            },
+            {
+              "name": "startOfMonthDate",
+              "value": "={{ $now.startOf('month').toFormat('yyyy-LL-dd') }}"
+            },
+            {
+              "name": "currentYear",
+              "value": "={{ $now.toFormat('yyyy') }}"
+            },
+            {
+              "name": "currentMonth",
+              "value": "={{ $now.toFormat('LL') }}"
+            },
+            {
+              "name": "todayDay",
+              "value": "={{ $now.toFormat('d') }}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0002",
+      "name": "Config",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        460,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.baseUrl + '/api/v1/auth/authenticate' }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ ({ email: $json.email, password: $json.password }) }}"
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0003",
+      "name": "Authenticate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        700,
+        320
+      ]
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/dashboard/admin/summary' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0004",
+      "name": "Get Dashboard Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        40
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/reports/sales/daily' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "={{ $('Config').first().json.todayDate }}"
+            },
+            {
+              "name": "to",
+              "value": "={{ $('Config').first().json.todayDate }}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0005",
+      "name": "Get Daily Sales",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        120
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/reports/sales/monthly' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "year",
+              "value": "={{ $('Config').first().json.currentYear }}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0006",
+      "name": "Get Monthly Sales",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        200
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/reports/sales/vs-targets' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        },
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "={{ $('Config').first().json.startOfMonthDate }}"
+            },
+            {
+              "name": "to",
+              "value": "={{ $('Config').first().json.todayDate }}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0007",
+      "name": "Get Sales Vs Targets",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        280
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/sales-targets/summary' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0008",
+      "name": "Get Targets Summary",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        360
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/sales-targets' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0009",
+      "name": "Get Targets Detail",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        440
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/reports/inventory-alerts' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0010",
+      "name": "Get Inventory Alerts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        520
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/ar' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0011",
+      "name": "Get Accounts Receivable",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        600
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Config').first().json.baseUrl + '/api/v1/expenses' }}",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{$('Authenticate').first().json.token}}"
+            }
+          ]
+        }
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0012",
+      "name": "Get Expenses",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        980,
+        680
+      ],
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineAll"
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0013",
+      "name": "Merge Reports",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1230,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const cfg = $('Config').first().json;\n\nfunction safeNodeJson(name) {\n  try {\n    return $(name).first()?.json ?? {};\n  } catch (error) {\n    return {};\n  }\n}\n\nfunction asArray(value) {\n  if (Array.isArray(value)) return value;\n  return [];\n}\n\nfunction toNumber(value) {\n  const num = Number(value ?? 0);\n  return Number.isFinite(num) ? num : 0;\n}\n\nfunction money(value) {\n  return '$' + toNumber(value).toFixed(2);\n}\n\nfunction percent(value) {\n  return toNumber(value).toFixed(1) + '%';\n}\n\nfunction itemPeriodTotal(raw) {\n  if (raw && typeof raw === 'object' && raw.totalAmount != null) {\n    return toNumber(raw.totalAmount);\n  }\n  const points = asArray(raw?.points);\n  return points.reduce((sum, point) => sum + toNumber(point.total), 0);\n}\n\nfunction itemPeriodCount(raw) {\n  if (raw && typeof raw === 'object' && raw.totalCount != null) {\n    return toNumber(raw.totalCount);\n  }\n  const points = asArray(raw?.points);\n  return points.reduce((sum, point) => sum + toNumber(point.count), 0);\n}\n\nfunction parseTargets(items) {\n  return asArray(items).map((item) => ({\n    softwareName: item.softwareName ?? 'Producto',\n    metaUnits: toNumber(item.metaUnits),\n    unitsSoldCurrent: toNumber(item.unitsSoldCurrent),\n    expectedProfit: toNumber(item.expectedProfit),\n    targetAchieved: Boolean(item.targetAchieved),\n    deadline: item.deadline ?? null,\n  }));\n}\n\nfunction parseVsTargets(items) {\n  return asArray(items).map((item) => ({\n    softwareName: item.softwareName ?? 'Producto',\n    metaUnits: toNumber(item.metaUnits),\n    actualUnits: toNumber(item.actualUnits),\n    varianceUnits: toNumber(item.varianceUnits),\n    achieved: Boolean(item.achieved),\n    deadline: item.deadline ?? null,\n  }));\n}\n\nfunction dueDateForCurrentMonth(dueDay, now) {\n  if (!dueDay || dueDay < 1) return null;\n  const year = now.getFullYear();\n  const month = now.getMonth();\n  const lastDay = new Date(year, month + 1, 0).getDate();\n  const safeDay = Math.min(dueDay, lastDay);\n  const date = new Date(year, month, safeDay);\n  return date;\n}\n\nfunction isoDate(date) {\n  if (!date) return null;\n  return new Date(date.getTime() - date.getTimezoneOffset() * 60000).toISOString().slice(0, 10);\n}\n\nconst dashboard = safeNodeJson('Get Dashboard Summary');\nconst dailySales = safeNodeJson('Get Daily Sales');\nconst monthlySales = safeNodeJson('Get Monthly Sales');\nconst vsTargets = safeNodeJson('Get Sales Vs Targets');\nconst targetsSummary = safeNodeJson('Get Targets Summary');\nconst targetsDetail = safeNodeJson('Get Targets Detail');\nconst inventoryAlerts = safeNodeJson('Get Inventory Alerts');\nconst arList = safeNodeJson('Get Accounts Receivable');\nconst expensesList = safeNodeJson('Get Expenses');\n\nconst now = new Date(cfg.todayDate + 'T00:00:00');\nconst todayIso = cfg.todayDate;\nconst next3 = new Date(now);\nnext3.setDate(next3.getDate() + 3);\nconst next3Iso = isoDate(next3);\n\nconst todaySalesAmount = itemPeriodTotal(dailySales) || toNumber(dashboard.todaySalesAmount);\nconst todaySalesCount = itemPeriodCount(dailySales) || toNumber(dashboard.todaySalesCount);\nconst monthSalesAmount = itemPeriodTotal(monthlySales) || toNumber(dashboard.monthSalesAmount);\nconst monthSalesCount = itemPeriodCount(monthlySales) || toNumber(dashboard.monthSalesCount);\nconst monthProfitAmount = toNumber(dashboard.monthProfitAmount);\n\nconst totalTargetRevenue = toNumber(targetsSummary.totalTargetRevenue);\nconst totalExpectedProfit = toNumber(targetsSummary.totalExpectedProfit ?? dashboard.monthExpectedProfit);\nconst achievedTargets = toNumber(targetsSummary.achievedTargets);\nconst pendingTargets = toNumber(targetsSummary.pendingTargets);\nconst totalTargets = toNumber(targetsSummary.totalTargets);\nconst totalMetaUnits = toNumber(targetsSummary.totalMetaUnits);\n\nconst progressPercent = totalTargetRevenue > 0 ? (monthSalesAmount / totalTargetRevenue) * 100 : 0;\nconst remainingToGoal = Math.max(totalTargetRevenue - monthSalesAmount, 0);\nconst dayOfMonth = now.getDate();\nconst daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();\nconst expectedPercentToday = daysInMonth > 0 ? (dayOfMonth / daysInMonth) * 100 : 0;\nconst projectedClose = dayOfMonth > 0 ? (monthSalesAmount / dayOfMonth) * daysInMonth : monthSalesAmount;\nconst behindPlan = progressPercent < expectedPercentToday;\n\nconst targetItems = parseTargets(targetsDetail);\nconst vsTargetItems = parseVsTargets(vsTargets.items);\n\nconst topAchieved = vsTargetItems\n  .filter((item) => item.achieved || item.actualUnits > 0)\n  .sort((a, b) => b.actualUnits - a.actualUnits)\n  .slice(0, 5);\n\nconst delayedTargets = vsTargetItems\n  .filter((item) => !item.achieved)\n  .sort((a, b) => a.varianceUnits - b.varianceUnits)\n  .slice(0, 5);\n\nconst coldProducts = asArray(inventoryAlerts).slice(0, 5);\n\nconst arItems = asArray(arList);\nconst overdueAr = arItems.filter((item) => String(item.status || '').toUpperCase() === 'OVERDUE');\nconst openAr = arItems.filter((item) => String(item.status || '').toUpperCase() === 'OPEN');\nconst overdueArTotal = overdueAr.reduce((sum, item) => sum + toNumber(item.balance), 0);\nconst openArTotal = openAr.reduce((sum, item) => sum + toNumber(item.balance), 0);\n\nconst expenseItems = asArray(expensesList)\n  .filter((item) => Boolean(item.active))\n  .map((item) => {\n    const dueDate = dueDateForCurrentMonth(toNumber(item.dueDay), now);\n    return {\n      name: item.name ?? 'Gasto',\n      category: item.category ?? '',\n      monthlyAmount: toNumber(item.monthlyAmount ?? item.totalAmount),\n      dueDay: toNumber(item.dueDay),\n      dueDateIso: isoDate(dueDate),\n    };\n  })\n  .filter((item) => item.dueDateIso);\n\nconst dueTodayExpenses = expenseItems.filter((item) => item.dueDateIso === todayIso);\nconst overdueExpenses = expenseItems.filter((item) => item.dueDateIso < todayIso);\nconst next3Expenses = expenseItems.filter((item) => item.dueDateIso > todayIso && item.dueDateIso <= next3Iso);\nconst dueTodayExpensesTotal = dueTodayExpenses.reduce((sum, item) => sum + item.monthlyAmount, 0);\nconst overdueExpensesTotal = overdueExpenses.reduce((sum, item) => sum + item.monthlyAmount, 0);\nconst next3ExpensesTotal = next3Expenses.reduce((sum, item) => sum + item.monthlyAmount, 0);\n\nlet statusEmoji = '✅';\nlet priority = 'Mantener ritmo comercial, seguimiento y conversion de metas abiertas.';\nif (overdueArTotal > 0 || overdueExpensesTotal > 0) {\n  statusEmoji = '🚨';\n  priority = 'Prioridad en liquidez: atender cartera vencida y obligaciones del mes.';\n} else if (dueTodayExpensesTotal > 0) {\n  statusEmoji = '⚠️';\n  priority = 'Hoy hay compromisos de caja. Sostener ventas y cuidar pagos del dia.';\n} else if (behindPlan || todaySalesAmount <= 0) {\n  statusEmoji = '⚠️';\n  priority = 'El ritmo comercial va por debajo de lo esperado. Empujar cierre y seguimiento hoy.';\n}\n\nconst achievedLines = topAchieved.length\n  ? topAchieved.map((item, index) => `${index + 1}. ${item.softwareName}: ${item.actualUnits}/${item.metaUnits}`).join('\\n')\n  : 'Sin productos con avance';\n\nconst delayedLines = delayedTargets.length\n  ? delayedTargets.map((item, index) => `${index + 1}. ${item.softwareName}: faltan ${Math.abs(item.varianceUnits)} unidades`).join('\\n')\n  : 'Sin metas atrasadas';\n\nconst coldLines = coldProducts.length\n  ? coldProducts.map((item) => `- ${item.name}`).join('\\n')\n  : 'Sin productos frios';\n\nconst overdueArLines = overdueAr.length\n  ? overdueAr.slice(0, 5).map((item) => `- AR ${item.saleId}: ${money(item.balance)} vence ${item.dueDate ?? 's/f'}`).join('\\n')\n  : 'Sin cartera vencida';\n\nconst dueTodayLines = dueTodayExpenses.length\n  ? dueTodayExpenses.map((item) => `- ${item.name}: ${money(item.monthlyAmount)}`).join('\\n')\n  : 'Sin pagos hoy';\n\nconst overdueExpenseLines = overdueExpenses.length\n  ? overdueExpenses.map((item) => `- ${item.name}: ${money(item.monthlyAmount)} (dia ${item.dueDay})`).join('\\n')\n  : 'Sin gastos vencidos';\n\nconst next3ExpenseLines = next3Expenses.length\n  ? next3Expenses.map((item) => `- ${item.name}: ${money(item.monthlyAmount)} (${item.dueDateIso})`).join('\\n')\n  : 'Sin pagos proximos';\n\nconst message = `📊 <b>REPORTE DIARIO DISMAL</b>\\n\\n` +\n`Fecha: <b>${todayIso}</b>\\n\\n` +\n`💰 <b>VENTAS</b>\\n` +\n`Hoy: <b>${money(todaySalesAmount)}</b> (${todaySalesCount} ventas)\\n` +\n`Mes: <b>${money(monthSalesAmount)}</b> (${monthSalesCount} ventas)\\n` +\n`Utilidad mes: <b>${money(monthProfitAmount)}</b>\\n\\n` +\n`🎯 <b>METAS REALES DEL SISTEMA</b>\\n` +\n`Meta ingresos mes: <b>${money(totalTargetRevenue)}</b>\\n` +\n`Faltante: <b>${money(remainingToGoal)}</b>\\n` +\n`Avance: <b>${percent(progressPercent)}</b>\\n` +\n`Ritmo esperado: <b>${percent(expectedPercentToday)}</b>\\n` +\n`Proyeccion cierre: <b>${money(projectedClose)}</b>\\n` +\n`Metas logradas: <b>${achievedTargets}/${totalTargets}</b>\\n` +\n`Metas pendientes: <b>${pendingTargets}</b>\\n` +\n`Unidades meta: <b>${totalMetaUnits}</b>\\n` +\n`Utilidad esperada: <b>${money(totalExpectedProfit)}</b>\\n\\n` +\n`🔥 <b>TOP AVANCE</b>\\n${achievedLines}\\n\\n` +\n`🚀 <b>METAS A EMPUJAR</b>\\n${delayedLines}\\n\\n` +\n`🧊 <b>PRODUCTOS SIN MOVIMIENTO</b>\\n${coldLines}\\n\\n` +\n`💳 <b>CARTERA</b>\\n` +\n`Vencida total: <b>${money(overdueArTotal)}</b> (${overdueAr.length} cuentas)\\n` +\n`Abierta total: <b>${money(openArTotal)}</b> (${openAr.length} cuentas)\\n` +\n`${overdueArLines}\\n\\n` +\n`💸 <b>GASTOS DEL MES</b>\\n` +\n`Hoy: <b>${money(dueTodayExpensesTotal)}</b>\\n${dueTodayLines}\\n\\n` +\n`Vencidos: <b>${money(overdueExpensesTotal)}</b>\\n${overdueExpenseLines}\\n\\n` +\n`Proximos 3 dias: <b>${money(next3ExpensesTotal)}</b>\\n${next3ExpenseLines}\\n\\n` +\n`${statusEmoji} <b>PRIORIDAD DEL DIA</b>\\n${priority}`;\n\nreturn [{\n  json: {\n    message,\n    todaySalesAmount,\n    monthSalesAmount,\n    totalTargetRevenue,\n    progressPercent,\n    expectedPercentToday,\n    projectedClose,\n    overdueArTotal,\n    openArTotal,\n    dueTodayExpensesTotal,\n    overdueExpensesTotal,\n    next3ExpensesTotal,\n    achievedTargets,\n    pendingTargets,\n    topAchieved,\n    delayedTargets,\n    coldProducts,\n    targetItems,\n  }\n}];"
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0014",
+      "name": "Build Telegram Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1490,
+        360
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ 'https://api.telegram.org/bot' + $('Config').first().json.telegramBotToken + '/sendMessage' }}",
+        "sendBody": true,
+        "contentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={{ ({ chat_id: $('Config').first().json.telegramChatId, text: $json.message, parse_mode: 'HTML' }) }}"
+      },
+      "id": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0a0015",
+      "name": "Send Telegram",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1740,
+        360
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Morning Trigger": {
+      "main": [
+        [
+          {
+            "node": "Config",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Config": {
+      "main": [
+        [
+          {
+            "node": "Authenticate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticate": {
+      "main": [
+        [
+          {
+            "node": "Get Dashboard Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Daily Sales",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Monthly Sales",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Sales Vs Targets",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Targets Summary",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Targets Detail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Inventory Alerts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Accounts Receivable",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Expenses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Dashboard Summary": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Daily Sales": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Get Monthly Sales": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Get Sales Vs Targets": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Get Targets Summary": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Get Targets Detail": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Get Inventory Alerts": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 6
+          }
+        ]
+      ]
+    },
+    "Get Accounts Receivable": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 7
+          }
+        ]
+      ]
+    },
+    "Get Expenses": {
+      "main": [
+        [
+          {
+            "node": "Merge Reports",
+            "type": "main",
+            "index": 8
+          }
+        ]
+      ]
+    },
+    "Merge Reports": {
+      "main": [
+        [
+          {
+            "node": "Build Telegram Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Build Telegram Report": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "0f4b4dd6-1897-4f8d-80d5-1f0d8d0affff",
+  "meta": {
+    "templateCredsSetupCompleted": false,
+    "instanceId": "dismal-morning-telegram-real-data"
+  },
+  "id": "DISMAL-Morning-Telegram-Real-Data",
+  "tags": []
+}

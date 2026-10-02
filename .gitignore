@@ -1,0 +1,42 @@
+# OS
+.DS_Store
+
+# Environment
+.env
+.env.*
+!.env.example
+!.env.*.example
+
+# Java / Maven
+*.class
+*.jar
+*.war
+*.ear
+/target/
+**/target/
+
+# Logs
+*.log
+
+# IDE
+.idea/
+*.iml
+
+# Node / Next.js
+**/node_modules/
+**/.next/
+**/dist/
+**/out/
+**/release/
+**/deploy/
+**/.env.local
+
+# Local DB files
+*.db
+*.mv.db
+*.h2.db
+
+# Misc
+.classpath
+.project
+.settings/

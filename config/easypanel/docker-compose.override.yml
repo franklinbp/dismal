@@ -1,0 +1,19 @@
+services:
+  backend:
+    networks:
+      default:
+      easypanel:
+        aliases:
+          - dismal-api
+
+  web:
+    networks:
+      default:
+      easypanel:
+        aliases:
+          - dismal-admin
+
+networks:
+  easypanel:
+    external: true
+    name: ${EASYPANEL_PROXY_NETWORK:-easypanel}

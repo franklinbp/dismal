@@ -1,0 +1,19 @@
+### 1. Registrar un Usuario Nuevo
+POST http://localhost:8080/api/v1/auth/register
+Content-Type: application/json
+
+{
+  "firstname": "Franklin",
+  "lastname": "Bermeo",
+  "email": "franklin@dismal.net",
+  "password": "password123"
+}
+
+### 2. (Opcional) Intentar hacer Login con ese usuario
+POST http://localhost:8080/api/v1/auth/authenticate
+Content-Type: application/json
+
+{
+  "email": "franklin@dismal.net",
+  "password": "password123"
+}

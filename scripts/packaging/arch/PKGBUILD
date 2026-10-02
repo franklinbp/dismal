@@ -1,0 +1,16 @@
+pkgname=dismal-desktop
+pkgver=1.0.0
+pkgrel=1
+pkgdesc="Dismal Desktop"
+arch=('x86_64')
+license=('Proprietary')
+depends=('java-runtime')
+
+source=("app-image.tar.gz")
+
+package() {
+  mkdir -p "${pkgdir}/opt/${pkgname}"
+  tar -xzf "${srcdir}/app-image.tar.gz" -C "${pkgdir}/opt/${pkgname}"
+  mkdir -p "${pkgdir}/usr/bin"
+  ln -s "/opt/${pkgname}/Dismal Desktop/Dismal Desktop" "${pkgdir}/usr/bin/${pkgname}"
+}

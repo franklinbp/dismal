@@ -1,0 +1,58 @@
+http:
+  routers:
+    dismal-admin-http:
+      entryPoints:
+        - "__HTTP_ENTRYPOINT__"
+      rule: "Host(`dismal.vip`) || Host(`www.dismal.vip`)"
+      middlewares:
+        - dismal-force-https
+      service: dismal-admin
+
+    dismal-admin-https:
+      entryPoints:
+        - "__HTTPS_ENTRYPOINT__"
+      rule: "Host(`dismal.vip`) || Host(`www.dismal.vip`)"
+      service: dismal-admin
+      tls:
+        certResolver: "__CERT_RESOLVER__"
+
+    dismal-api-http:
+      entryPoints:
+        - "__HTTP_ENTRYPOINT__"
+      rule: "Host(`api.dismal.vip`)"
+      middlewares:
+        - dismal-force-https
+      service: dismal-api
+
+    dismal-api-https:
+      entryPoints:
+        - "__HTTPS_ENTRYPOINT__"
+      rule: "Host(`api.dismal.vip`)"
+      service: dismal-api
+      tls:
+        certResolver: "__CERT_RESOLVER__"
+
+  middlewares:
+    dismal-force-https:
+      redirectScheme:
+        scheme: https
+        permanent: true
+
+  services:
+    dismal-admin:
+      loadBalancer:
+        healthCheck:
+          path: /login
+          interval: 30s
+          timeout: 5s
+        servers:
+          - url: "http://dismal-admin:3000"
+
+    dismal-api:
+      loadBalancer:
+        healthCheck:
+          path: /actuator/health
+          interval: 30s
+          timeout: 5s
+        servers:
+          - url: "http://dismal-api:8080"

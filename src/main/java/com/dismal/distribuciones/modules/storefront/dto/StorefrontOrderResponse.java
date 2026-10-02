@@ -1,0 +1,52 @@
+package com.dismal.distribuciones.modules.storefront.dto;
+
+import com.dismal.distribuciones.modules.security.domain.CustomerType;
+import com.dismal.distribuciones.modules.storefront.domain.StorefrontCheckoutMethod;
+import com.dismal.distribuciones.modules.storefront.domain.StorefrontCountry;
+import com.dismal.distribuciones.modules.storefront.domain.StorefrontOrderStatus;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.UUID;
+
+public record StorefrontOrderResponse(
+        UUID orderId,
+        String orderNumber,
+        StorefrontOrderStatus status,
+        StorefrontCountry country,
+        String currency,
+        CustomerType customerType,
+        StorefrontCheckoutMethod checkoutMethod,
+        boolean paymentRequired,
+        UUID customerId,
+        String email,
+        String firstName,
+        String lastName,
+        String phone,
+        String taxId,
+        String shippingRecipient,
+        String shippingAddressLine1,
+        String shippingAddressLine2,
+        String shippingCity,
+        String shippingRegion,
+        String shippingPostalCode,
+        String shippingCountry,
+        String shippingNotes,
+        String shippingCarrier,
+        String trackingNumber,
+        LocalDateTime shippedAt,
+        LocalDateTime deliveredAt,
+        BigDecimal subtotal,
+        BigDecimal discountTotal,
+        BigDecimal total,
+        UUID paymentAccountId,
+        String paymentClaimBank,
+        String paymentClaimReference,
+        String paymentClaimPayer,
+        BigDecimal paymentClaimAmount,
+        LocalDateTime paymentClaimedAt,
+        String paymentReviewNotes,
+        LocalDateTime createdAt,
+        List<StorefrontOrderItemResponse> items
+) {}

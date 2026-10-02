@@ -1,0 +1,76 @@
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: dismal_db
+      POSTGRES_USER: dismal
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U dismal -d dismal_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+  backend:
+    build: .
+    environment:
+      SPRING_PROFILES_ACTIVE: prod
+      PORT: ${PORT:-8080}
+      DB_URL: jdbc:postgresql://db:5432/dismal_db
+      DB_USER: dismal
+      DB_PASSWORD: ${DB_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      AES_KEY: ${AES_KEY}
+      CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
+      ACCOUNT_EC_STOREFRONT_URL: ${ACCOUNT_EC_STOREFRONT_URL:-https://www.dismal.net}
+      ACCOUNT_PE_STOREFRONT_URL: ${ACCOUNT_PE_STOREFRONT_URL:-https://www.dismal.net.pe}
+      SMTP_ENABLED: ${SMTP_ENABLED:-false}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-0}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_TLS: ${SMTP_TLS:-true}
+      SMTP_FROM_EMAIL: ${SMTP_FROM_EMAIL:-}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Dismal}
+      ADMIN_IMPORT_DEFAULT_PASSWORD: ${ADMIN_IMPORT_DEFAULT_PASSWORD}
+      ADMIN_AR_BLOCK_DAYS: ${ADMIN_AR_BLOCK_DAYS:-30}
+      ADMIN_RESET_PASSWORD_ENABLED: ${ADMIN_RESET_PASSWORD_ENABLED:-false}
+      SALES_FIXED_COST_GLOBAL: ${SALES_FIXED_COST_GLOBAL:-300}
+      SALES_FIXED_COST_MODE: ${SALES_FIXED_COST_MODE:-GLOBAL}
+      OUTBOX_DISPATCH_ENABLED: ${OUTBOX_DISPATCH_ENABLED:-true}
+      OUTBOX_DISPATCH_RATE_MS: ${OUTBOX_DISPATCH_RATE_MS:-5000}
+      OUTBOX_DISPATCH_MAX_ATTEMPTS: ${OUTBOX_DISPATCH_MAX_ATTEMPTS:-10}
+      INVOICE_PDF_BASE_URL: ${INVOICE_PDF_BASE_URL:-}
+      AR_OVERDUE_CRON: ${AR_OVERDUE_CRON:-0 10 2 * * *}
+      N8N_WEBHOOK_URL: ${N8N_WEBHOOK_URL:-}
+      N8N_SECRET: ${N8N_SECRET:-}
+      DISMAL_CRM_ENABLED: ${DISMAL_CRM_ENABLED:-false}
+      DISMAL_CRM_BASE_URL: ${DISMAL_CRM_BASE_URL:-}
+      DISMAL_CRM_API_TOKEN: ${DISMAL_CRM_API_TOKEN:-}
+      DISMAL_CRM_WHATSAPP_ENABLED: ${DISMAL_CRM_WHATSAPP_ENABLED:-false}
+      DISMAL_CRM_WHATSAPP_ID: ${DISMAL_CRM_WHATSAPP_ID:-}
+      DISMAL_CRM_WHATSAPP_ID_BY_COUNTRY: ${DISMAL_CRM_WHATSAPP_ID_BY_COUNTRY:-}
+      WOOCOMMERCE_API_KEY: ${WOOCOMMERCE_API_KEY:-}
+    ports:
+      - "127.0.0.1:9001:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+  web:
+    build: ./apps/web
+    environment:
+      NODE_ENV: production
+      BASE_API_URL: http://backend:8080
+      NEXT_PUBLIC_BASE_API_URL: http://backend:8080
+    ports:
+      - "127.0.0.1:6001:3000"
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+volumes:
+  db_data:

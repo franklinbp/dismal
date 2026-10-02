@@ -1,0 +1,336 @@
+DISMAL - RESUMEN TECNICO DEL PROYECTO
+======================================
+
+1. PROPOSITO GENERAL
+Dismal es el sistema principal de negocio de la empresa. Su funcion es administrar el ciclo comercial y operativo de licencias digitales: productos, inventario de licencias, clientes, ventas, cuentas por cobrar, facturacion, planeacion financiera, reportes, marketing e integraciones externas.
+
+El proyecto no es solo una web. Es un monorepo con backend central y varios clientes:
+- Backend API: Spring Boot / Java 21.
+- Web administrativa: Next.js.
+- App de escritorio: JavaFX.
+- App Android.
+- Integracion WordPress / WooCommerce.
+
+
+2. ARQUITECTURA GENERAL
+El backend vive en:
+- src/main/java/com/dismal/dismal
+
+La web administrativa vive en:
+- apps/web
+
+Otras aplicaciones del mismo ecosistema:
+- apps/desktop
+- apps/android
+- apps/wordpress/dismal-woocommerce-bridge
+
+Tecnologias principales:
+- Java 21
+- Spring Boot 3.2
+- Spring Security con JWT
+- Spring Data JPA
+- PostgreSQL
+- Next.js 14 en frontend web
+- WebClient para integraciones HTTP
+
+
+3. QUE HACE EL SISTEMA
+Dismal cubre estas areas:
+
+3.1. Seguridad y acceso
+- Registro y autenticacion.
+- Login con JWT.
+- Control de acceso por roles.
+- Rutas protegidas para administracion, planeacion, ventas e integraciones.
+
+3.2. Catalogo e inventario
+- Crear y editar productos.
+- Manejar 4 precios comerciales por producto:
+  - EC Final
+  - EC Distribuidor
+  - PE Final
+  - PE Distribuidor
+- Registrar licencias.
+- Controlar activaciones disponibles por licencia.
+- Cifrar el licenseKey con AES antes de persistirlo.
+
+3.3. Clientes
+- Registro y administracion de clientes.
+- Datos de contacto y datos fiscales.
+- Estado del cliente.
+- Limites de credito.
+- Resumen comercial del cliente.
+
+3.4. Ventas
+- Crear ventas de contado o credito.
+- Asociar cliente, productos y cantidades.
+- Calcular total, saldo y pagos.
+- Consumir activaciones de licencias cuando corresponde.
+- Emitir eventos de negocio para integraciones.
+
+3.5. Facturacion y cuentas por cobrar
+- Crear factura asociada a la venta.
+- Registrar pagos.
+- Administrar cuentas por cobrar abiertas y vencidas.
+- Detectar vencimientos y generar eventos de seguimiento.
+
+3.6. Planeacion
+- Crear metas financieras por producto.
+- Definir:
+  - meta de unidades
+  - precio de venta
+  - costo variable
+  - costo fijo
+  - fecha limite
+  - notas
+- Calcular:
+  - margen unitario
+  - revenue objetivo
+  - contribucion total
+  - punto de equilibrio
+  - ganancia esperada
+
+3.7. Metas
+- Mostrar el seguimiento de metas ya trazadas.
+- Ver avance vendido contra meta.
+- Ver rentabilidad esperada.
+- Mostrar si una meta es rentable o no.
+
+3.8. Dashboard
+- Resumen comercial del dia y del mes.
+- Utilidad.
+- AR abierto y vencido.
+- Metas activas.
+- Outbox fallido.
+- Alertas comerciales de marketing.
+
+3.9. Marketing
+- Gestionar campañas.
+- Analizar productos con baja rotacion.
+- Detectar oportunidades comerciales.
+- Programar envios y generar eventos para n8n.
+
+3.10. Reportes
+- Ventas por periodo.
+- Utilidad.
+- Clientes inactivos.
+- Inventario frio.
+- Ventas vs metas.
+- Lista de precios.
+
+
+4. MODULOS PRINCIPALES DEL BACKEND
+Los modulos mas importantes del backend son:
+
+- modules/security
+  Seguridad, usuarios, autenticacion JWT y roles.
+
+- modules/store
+  Productos, licencias, activaciones y analitica de inventario.
+
+- modules/sales
+  Ventas, pagos, invoice, cuentas por cobrar, anulaciones y jobs operativos.
+
+- modules/planning
+  Planeacion financiera por producto.
+
+- modules/dashboard
+  Resumen ejecutivo y seguimiento consolidado.
+
+- modules/reports
+  Reportes comerciales, financieros y operativos.
+
+- modules/marketing
+  Campañas e inteligencia comercial.
+
+- modules/integrations
+  Outbox, n8n, plantillas de notificacion, CRM, WooCommerce y configuraciones externas.
+
+
+5. FLUJO PRINCIPAL DE UNA VENTA
+El flujo normal del sistema es:
+
+1. Se crea una venta.
+2. Se asocia cliente, productos, cantidades y precio.
+3. Si el producto requiere licencia, se consume una activacion disponible.
+4. Se registra la venta.
+5. Se crea AR si la venta es a credito.
+6. Se puede emitir factura.
+7. Se publican eventos en el outbox.
+8. El outbox despacha esos eventos hacia n8n.
+9. n8n puede enviar email, WhatsApp y registrar callbacks.
+
+Eventos de negocio importantes:
+- SALE_CONFIRMED
+- INVOICE_ISSUED
+- PAYMENT_RECEIVED
+- LICENSES_DELIVERED
+- AR_OVERDUE
+- SALE_CANCELLED
+
+
+6. LOGICA DE PLANEACION Y METAS
+La logica correcta del proyecto es:
+
+- Planeacion:
+  sirve para modelar financieramente una meta por producto.
+  No crea ventas reales ni descuenta inventario.
+
+- Metas:
+  sirve para revisar el cumplimiento de lo que ya fue trazado.
+  Es una vista de seguimiento, no el lugar principal de calculo.
+
+Actualmente esta logica ya esta alineada en el proyecto:
+- Planeacion = escenario financiero por producto.
+- Metas = seguimiento del objetivo.
+
+
+7. LISTA DE PRECIOS Y SALIDA COMERCIAL
+El sistema ya maneja lista de precios comercial desde la web.
+Puede generar:
+- PDF
+- Excel
+- texto para WhatsApp
+- envio por email
+
+La lista trabaja con los 4 precios del producto:
+- EC Final
+- EC Distribuidor
+- PE Final
+- PE Distribuidor
+
+
+8. INTEGRACIONES REALES DEL PROYECTO
+Dismal ya tiene integraciones reales o preparadas para:
+
+- n8n
+  Por webhook con outbox e HMAC.
+
+- WooCommerce
+  Por endpoint publico para orden pagada.
+
+- DismalCRM
+  Por gateway HTTP y sincronizacion de clientes / acciones de WhatsApp.
+
+- Email SMTP
+  Para pruebas y entrega de mensajes.
+
+
+9. COMO ESTA HECHA LA INTEGRACION CON N8N
+La integracion con n8n en Dismal es de primer nivel, no improvisada.
+
+Configuracion relevante en application.properties:
+- integrations.n8n.webhook-url
+- integrations.n8n.secret
+- outbox.dispatch.enabled
+- outbox.dispatch.rate-ms
+- outbox.dispatch.max-attempts
+
+Componentes clave:
+- EventOutbox
+- OutboxService
+- OutboxDispatcher
+- OutboxAdminService
+- NotificationDeliveryLog
+
+Rutas utiles:
+- /api/v1/integrations/outbox
+- /api/v1/integrations/n8n/test
+- /api/v1/integrations/notifications/templates/delivery-callback
+- /api/v1/dashboard/admin/outbox
+
+Funcionamiento:
+1. Un evento de negocio se guarda en event_outbox.
+2. El dispatcher lo intenta enviar al webhook de n8n.
+3. Si falla, agenda reintentos.
+4. Si n8n envia callback de entrega, el sistema guarda el resultado en delivery logs.
+
+Seguridad:
+- Dismal envia X-Signature.
+- La firma usa HMAC SHA-256 con integrations.n8n.secret.
+
+
+10. QUE NECESITA N8N PARA CONECTARSE A DISMAL
+Para conectar n8n con Dismal necesitas:
+
+10.1. Datos de red
+- URL publica del backend de Dismal.
+- Certificado SSL valido.
+- Permitir que n8n llegue por HTTPS.
+
+10.2. Variables / secretos
+- N8N webhook URL real.
+- N8N secret compartido con Dismal.
+- Credenciales SMTP si n8n enviara email.
+- Token del proveedor WhatsApp si n8n enviara mensajes por Evolution u otro gateway.
+
+10.3. En Dismal
+Debes configurar:
+- N8N_WEBHOOK_URL
+- N8N_SECRET
+- OUTBOX_DISPATCH_ENABLED=true
+
+10.4. En n8n
+Debes construir un flujo con:
+- Webhook node (entrada)
+- Validacion opcional de X-Signature
+- Switch por eventType
+- Ramas de envio:
+  - email
+  - WhatsApp
+  - otras acciones
+- HTTP Request al callback:
+  /api/v1/integrations/notifications/templates/delivery-callback
+
+10.5. Payload que n8n recibira
+El payload contiene:
+- eventType
+- saleId
+- client
+- items
+- ar
+- invoice
+- licenses o licensesDetailed
+- templateResolved
+- meta.idempotencyKey
+
+Esto permite que n8n no tenga que reconstruir toda la logica de negocio.
+
+
+11. COMO CONECTAR DISMAL CON DISMALCRM
+Dismal ya tiene base para integrarse con el CRM:
+- integrations.dismal-crm.enabled
+- integrations.dismal-crm.base-url
+- integrations.dismal-crm.api-token
+- integrations.dismal-crm.whatsapp-enabled
+- integrations.dismal-crm.whatsapp-id
+
+Esto sirve para:
+- sincronizacion de clientes
+- disparo de mensajes
+- orquestacion comercial entre negocio principal y CRM operativo
+
+
+12. RIESGOS Y PUNTOS DE CONTROL
+- La integracion n8n depende de que el webhook este bien configurado y accesible.
+- La firma HMAC debe validar el cuerpo crudo exacto.
+- El callback de entrega debe devolver el estado al sistema para trazabilidad.
+- No debes exponer secretos JWT, AES o N8N en repositorios publicos.
+- El outbox debe monitorearse desde dashboard o endpoints administrativos.
+
+
+13. RESUMEN EJECUTIVO
+Dismal es el sistema rector del negocio.
+Su funcion principal es:
+- vender
+- controlar licencias
+- gestionar clientes
+- medir metas y rentabilidad
+- emitir eventos para automatizaciones
+
+Si se conecta correctamente con n8n, Dismal puede automatizar:
+- entrega de licencias
+- envio de facturas
+- avisos de pago
+- seguimiento de cartera
+- campañas y notificaciones comerciales
