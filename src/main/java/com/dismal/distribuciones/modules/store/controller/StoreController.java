@@ -50,9 +50,7 @@ public class StoreController {
             Integer stockQuantity,
             Integer reservedQuantity,
             BigDecimal ecFinalPrice,
-            BigDecimal ecDistributorPrice,
-            BigDecimal peFinalPrice,
-            BigDecimal peDistributorPrice
+            BigDecimal ecDistributorPrice
     ) {
         public static SoftwareResponse from(Software software, ProductPricingResponse pricing) {
             return new SoftwareResponse(
@@ -69,9 +67,7 @@ public class StoreController {
                     software.getStockQuantity(),
                     software.getReservedQuantity(),
                     pricing.ecFinalPrice(),
-                    pricing.ecDistributorPrice(),
-                    pricing.peFinalPrice(),
-                    pricing.peDistributorPrice()
+                    pricing.ecDistributorPrice()
             );
         }
     }
@@ -88,9 +84,7 @@ public class StoreController {
             Boolean physicalProduct,
             Integer stockQuantity,
             BigDecimal ecFinalPrice,
-            BigDecimal ecDistributorPrice,
-            BigDecimal peFinalPrice,
-            BigDecimal peDistributorPrice
+            BigDecimal ecDistributorPrice
     ) {
         public Software toSoftware() {
             return Software.builder()
@@ -114,9 +108,7 @@ public class StoreController {
         Software savedSoftware = storeService.saveSoftware(
                 request.toSoftware(),
                 request.ecFinalPrice() != null ? request.ecFinalPrice() : request.price(),
-                request.ecDistributorPrice(),
-                request.peFinalPrice(),
-                request.peDistributorPrice()
+                request.ecDistributorPrice()
         );
         return new ResponseEntity<>(toResponse(savedSoftware), HttpStatus.CREATED);
     }
@@ -156,9 +148,7 @@ public class StoreController {
                 id,
                 request.toSoftware(),
                 request.ecFinalPrice() != null ? request.ecFinalPrice() : request.price(),
-                request.ecDistributorPrice(),
-                request.peFinalPrice(),
-                request.peDistributorPrice()
+                request.ecDistributorPrice()
         );
         return ResponseEntity.ok(toResponse(updatedSoftware));
     }

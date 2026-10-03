@@ -42,12 +42,10 @@ public class StoreService {
     @Transactional
     public Software saveSoftware(Software software,
                                  BigDecimal ecFinalPrice,
-                                 BigDecimal ecDistributorPrice,
-                                 BigDecimal peFinalPrice,
-                                 BigDecimal peDistributorPrice) {
+                                 BigDecimal ecDistributorPrice) {
         software.setPrice(ecFinalPrice);
         Software savedSoftware = softwareRepository.save(software);
-        syncConfiguredPriceLists(savedSoftware, ecFinalPrice, ecDistributorPrice, peFinalPrice, peDistributorPrice);
+        syncConfiguredPriceLists(savedSoftware, ecFinalPrice, ecDistributorPrice);
         return savedSoftware;
     }
 
@@ -130,9 +128,7 @@ public class StoreService {
     public Software updateSoftware(UUID id,
                                    Software softwareDetails,
                                    BigDecimal ecFinalPrice,
-                                   BigDecimal ecDistributorPrice,
-                                   BigDecimal peFinalPrice,
-                                   BigDecimal peDistributorPrice) {
+                                   BigDecimal ecDistributorPrice) {
         Software existingSoftware = softwareRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Software not found with ID: " + id));
 
@@ -144,7 +140,7 @@ public class StoreService {
         copyCommerceFields(existingSoftware, softwareDetails);
 
         Software updatedSoftware = softwareRepository.save(existingSoftware);
-        syncConfiguredPriceLists(updatedSoftware, ecFinalPrice, ecDistributorPrice, peFinalPrice, peDistributorPrice);
+        syncConfiguredPriceLists(updatedSoftware, ecFinalPrice, ecDistributorPrice);
         return updatedSoftware;
     }
 
@@ -157,7 +153,7 @@ public class StoreService {
     }
 
     private void syncDefaultPriceLists(Software software) {
-        syncConfiguredPriceLists(software, software.getPrice(), software.getPrice(), software.getPrice(), software.getPrice());
+        syncConfiguredPriceLists(software, software.getPrice(), software.getPrice());
     }
 
     private void syncPublicPriceList(Software software) {
@@ -166,13 +162,9 @@ public class StoreService {
 
     private void syncConfiguredPriceLists(Software software,
                                           BigDecimal ecFinalPrice,
-                                          BigDecimal ecDistributorPrice,
-                                          BigDecimal peFinalPrice,
-                                          BigDecimal peDistributorPrice) {
+                                          BigDecimal ecDistributorPrice) {
         syncPriceList(software, PriceListType.EC_FINAL, ecFinalPrice);
         syncPriceList(software, PriceListType.EC_DISTRIBUTOR, ecDistributorPrice != null ? ecDistributorPrice : ecFinalPrice);
-        syncPriceList(software, PriceListType.PE_FINAL, peFinalPrice != null ? peFinalPrice : ecFinalPrice);
-        syncPriceList(software, PriceListType.PE_DISTRIBUTOR, peDistributorPrice != null ? peDistributorPrice : peFinalPrice != null ? peFinalPrice : ecFinalPrice);
     }
 
     private void copyCommerceFields(Software target, Software source) {

@@ -16,8 +16,6 @@ type Product = {
   price: number;
   ecFinalPrice?: number | null;
   ecDistributorPrice?: number | null;
-  peFinalPrice?: number | null;
-  peDistributorPrice?: number | null;
   platform: string | null;
   imageUrl: string | null;
   sku?: string | null;
@@ -103,8 +101,6 @@ export default function AdminProductsPage() {
     description: "",
     ecFinalPrice: "",
     ecDistributorPrice: "",
-    peFinalPrice: "",
-    peDistributorPrice: "",
     platform: "",
     imageUrl: "",
     sku: "",
@@ -171,8 +167,6 @@ export default function AdminProductsPage() {
       description: selected.description || "",
       ecFinalPrice: String(selected.ecFinalPrice ?? selected.price ?? ""),
       ecDistributorPrice: String(selected.ecDistributorPrice ?? ""),
-      peFinalPrice: String(selected.peFinalPrice ?? ""),
-      peDistributorPrice: String(selected.peDistributorPrice ?? ""),
       platform: selected.platform || "",
       imageUrl: selected.imageUrl || "",
       sku: selected.sku || "",
@@ -208,8 +202,6 @@ export default function AdminProductsPage() {
         price: ecFinalPrice,
         ecFinalPrice,
         ecDistributorPrice,
-        peFinalPrice: ecFinalPrice,
-        peDistributorPrice: ecDistributorPrice,
         platform: form.platform || null,
         imageUrl: form.imageUrl || null,
         sku: form.sku.trim() || null,
@@ -253,8 +245,6 @@ export default function AdminProductsPage() {
         price: ecFinalPrice,
         ecFinalPrice,
         ecDistributorPrice,
-        peFinalPrice: ecFinalPrice,
-        peDistributorPrice: ecDistributorPrice,
         platform: form.platform || null,
         imageUrl: form.imageUrl || null,
         sku: form.sku.trim() || null,
@@ -299,8 +289,6 @@ export default function AdminProductsPage() {
       description: "",
       ecFinalPrice: "",
       ecDistributorPrice: "",
-      peFinalPrice: "",
-      peDistributorPrice: "",
       platform: "",
       imageUrl: "",
       sku: "",
