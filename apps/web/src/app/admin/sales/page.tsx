@@ -1957,7 +1957,6 @@ export default function AdminSalesPage() {
                     }}
                   >
                     <option value="EC">Ecuador</option>
-                    <option value="PE">Peru</option>
                   </select>
                 </label>
                 <div className="flex flex-col gap-2 text-sm">

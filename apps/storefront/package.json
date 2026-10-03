@@ -8,8 +8,7 @@
     "typecheck": "tsc --noEmit",
     "build": "tsc && vite build",
     "build:ec": "tsc && vite build --mode ecuador",
-    "build:pe": "tsc && vite build --mode peru",
-    "build:all": "npm run build:ec && npm run build:pe",
+    "build:all": "npm run build:ec",
     "verify:build": "node scripts/verify-build.mjs",
     "preview": "vite preview --host 0.0.0.0"
   },

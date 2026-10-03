@@ -102,21 +102,21 @@ class PublicCatalogControllerIntegrationTest {
     }
 
     @Test
-    void publicCatalogUsesCountrySpecificPrices() throws Exception {
+    void publicCatalogAlwaysUsesEcuadorPrices() throws Exception {
         Software software = softwareRepository.save(Software.builder()
                 .name("Antivirus Pro")
                 .price(new BigDecimal("25.00"))
                 .build());
 
+        seedPrice(PriceListType.EC_FINAL, software, new BigDecimal("29.90"));
         seedPrice(PriceListType.PE_FINAL, software, new BigDecimal("99.90"));
-        seedPrice(PriceListType.PE_DISTRIBUTOR, software, new BigDecimal("74.90"));
 
         mockMvc.perform(get("/api/public/products/" + software.getId()).param("country", "PE"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.effectivePrice").value(99.90))
-                .andExpect(jsonPath("$.finalPrice").value(99.90))
+                .andExpect(jsonPath("$.effectivePrice").value(29.90))
+                .andExpect(jsonPath("$.finalPrice").value(29.90))
                 .andExpect(jsonPath("$.wholesalePrice").isEmpty())
-                .andExpect(jsonPath("$.priceType").value("PE_FINAL"));
+                .andExpect(jsonPath("$.priceType").value("EC_FINAL"));
     }
 
     private void seedPrice(PriceListType type, Software software, BigDecimal price) {

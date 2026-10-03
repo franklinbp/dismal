@@ -100,11 +100,7 @@ public class PublicCatalogController {
     }
 
     private String normalizeCountry(String country) {
-        if (country == null || country.isBlank()) {
-            return "EC";
-        }
-        String normalized = country.trim().toUpperCase(Locale.ROOT);
-        return normalized.equals("PE") ? "PE" : "EC";
+        return "EC";
     }
 
     private int valueOrZero(Integer value) {

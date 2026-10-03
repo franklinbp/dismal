@@ -134,13 +134,13 @@ class StorefrontOrderControllerIntegrationTest {
                 .purchasePrice(new BigDecimal("20.00"))
                 .build());
 
-        pricingService.upsertPrice(software.getId(), PriceListType.PE_FINAL, new BigDecimal("149.90"));
+        pricingService.upsertPrice(software.getId(), PriceListType.EC_FINAL, new BigDecimal("149.90"));
 
         StorefrontOrderRequest request = new StorefrontOrderRequest(
-                "PE",
+                "EC",
                 "final",
                 StorefrontCheckoutMethod.BANK_TRANSFER,
-                new StorefrontCustomerRequest("Ana", "Cliente", "ana@example.com", "+51999999999", null, "CompraSegura123"),
+                new StorefrontCustomerRequest("Ana", "Cliente", "ana@example.com", "+593999999999", null, "CompraSegura123"),
                 List.of(new StorefrontOrderItemRequest(software.getId(), 2))
         );
 
@@ -149,8 +149,8 @@ class StorefrontOrderControllerIntegrationTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.status").value(StorefrontOrderStatus.PENDING_PAYMENT.name()))
-                .andExpect(jsonPath("$.country").value("PE"))
-                .andExpect(jsonPath("$.currency").value("PEN"))
+                .andExpect(jsonPath("$.country").value("EC"))
+                .andExpect(jsonPath("$.currency").value("USD"))
                 .andExpect(jsonPath("$.customerType").value(CustomerType.FINAL.name()))
                 .andExpect(jsonPath("$.total").value(299.80));
 
@@ -528,7 +528,7 @@ class StorefrontOrderControllerIntegrationTest {
     }
 
     @Test
-    void isolatesDistributorPricingAndCreditBetweenEcuadorAndPeru() throws Exception {
+    void acceptsEcuadorCommerceAndRejectsPeruOrders() throws Exception {
         Software software = softwareRepository.save(Software.builder()
                 .name("Microsoft 365 Multimercado")
                 .price(new BigDecimal("100.00"))
@@ -625,11 +625,8 @@ class StorefrontOrderControllerIntegrationTest {
                         .with(user(customer.getEmail()).authorities(() -> "USER"))
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(peruTransferRequest)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.country").value("PE"))
-                .andExpect(jsonPath("$.currency").value("PEN"))
-                .andExpect(jsonPath("$.customerType").value("FINAL"))
-                .andExpect(jsonPath("$.total").value(140.00));
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("Dismal opera exclusivamente en Ecuador."));
 
         CustomerMarket updatedEcuador = customerMarketRepository.findById(ecuador.getId()).orElseThrow();
         CustomerMarket updatedPeru = customerMarketRepository.findById(peru.getId()).orElseThrow();
@@ -657,8 +654,7 @@ class StorefrontOrderControllerIntegrationTest {
                         .param("country", "PE")
                         .with(user(customer.getEmail()).authorities(() -> "USER")))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.content[0].order.country").value("PE"));
+                .andExpect(jsonPath("$.totalElements").value(0));
     }
 
     @Test

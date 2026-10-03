@@ -586,7 +586,6 @@ export default function AdminUsersPage() {
                   >
                     {([
                       { code: "EC", label: "Ecuador", currency: "USD" },
-                      { code: "PE", label: "Peru", currency: "PEN" },
                     ] as const).map((market) => (
                       <button
                         key={market.code}
@@ -924,7 +923,7 @@ export default function AdminUsersPage() {
                       />
                       <span className="text-sm text-slate-200">
                         {activeTab === "client"
-                          ? `Cuenta activa en ${selectedCountry === "EC" ? "Ecuador" : "Peru"}`
+                          ? "Cuenta activa en Ecuador"
                           : "Usuario activo"}
                       </span>
                     </div>
@@ -944,7 +943,7 @@ export default function AdminUsersPage() {
                         <div>
                           <label className="label-pill">Mercado</label>
                           <div className="mt-2 flex h-10 items-center rounded-lg border border-cyan-400/30 bg-cyan-400/10 px-3 text-sm font-semibold text-cyan-100">
-                            {selectedCountry === "EC" ? "Ecuador · USD" : "Peru · PEN"}
+                            Ecuador · USD
                           </div>
                         </div>
                         <div>

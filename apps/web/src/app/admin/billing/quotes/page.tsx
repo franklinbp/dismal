@@ -477,7 +477,6 @@ export default function AdminQuotesPage() {
                     }}
                   >
                     <option value="EC">Ecuador</option>
-                    <option value="PE">Peru</option>
                   </select>
                 </div>
                 <div>

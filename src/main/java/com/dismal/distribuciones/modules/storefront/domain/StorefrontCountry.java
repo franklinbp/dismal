@@ -17,13 +17,9 @@ public enum StorefrontCountry {
     }
 
     public static StorefrontCountry from(String value) {
-        if (value == null || value.isBlank()) {
+        if (value == null || value.isBlank() || "EC".equalsIgnoreCase(value.trim())) {
             return EC;
         }
-        try {
-            return StorefrontCountry.valueOf(value.trim().toUpperCase());
-        } catch (IllegalArgumentException ex) {
-            throw new BadRequestException("Pais no soportado: " + value);
-        }
+        throw new BadRequestException("Dismal opera exclusivamente en Ecuador.");
     }
 }

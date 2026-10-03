@@ -101,7 +101,7 @@ export default function AdminIntegrationsPage() {
     smtpFromName: "",
     crmWhatsappEnabled: false,
     crmWhatsappDefaultId: "",
-    crmWhatsappIdByCountry: "EC:34,PE:35",
+    crmWhatsappIdByCountry: "EC:34",
   });
   const [templates, setTemplates] = useState<NotificationTemplate[]>([]);
   const [templateForm, setTemplateForm] = useState({
@@ -216,7 +216,7 @@ export default function AdminIntegrationsPage() {
             smtpFromName: settingsData.smtpFromName || "",
             crmWhatsappEnabled: settingsData.crmWhatsappEnabled,
             crmWhatsappDefaultId: settingsData.crmWhatsappDefaultId || "",
-            crmWhatsappIdByCountry: settingsData.crmWhatsappIdByCountry || "EC:34,PE:35",
+            crmWhatsappIdByCountry: settingsData.crmWhatsappIdByCountry || "EC:34",
           });
           setTemplates(templateData);
         } else {
@@ -978,7 +978,7 @@ export default function AdminIntegrationsPage() {
                       WhatsApp ID por pais
                       <input
                         className="rounded-xl border border-smoke/60 bg-white px-3 py-2"
-                        placeholder="EC:34,PE:35"
+                        placeholder="EC:34"
                         value={settingsForm.crmWhatsappIdByCountry}
                         onChange={(event) =>
                           setSettingsForm((prev) => ({ ...prev, crmWhatsappIdByCountry: event.target.value }))
@@ -988,8 +988,7 @@ export default function AdminIntegrationsPage() {
                   </div>
                   <div className="mt-3 grid gap-2 rounded-2xl border border-emerald-200 bg-white/80 p-3 text-xs text-slate/70">
                     <p>
-                      Ejemplo operativo: <span className="font-semibold">EC:34</span> envia clientes +593 por Dismal y{" "}
-                      <span className="font-semibold">PE:35</span> envia clientes +51 por Dismal Peru.
+                      Ejemplo operativo: <span className="font-semibold">EC:34</span> envia clientes +593 por Dismal Ecuador.
                     </p>
                     <p>
                       Si el pais no se detecta, se usa el ID por defecto. Esta configuracion queda guardada en base de

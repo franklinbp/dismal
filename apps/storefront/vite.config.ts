@@ -8,19 +8,11 @@ type SiteMetadata = {
   description: string;
 };
 
-const sites: Record<"ecuador" | "peru", SiteMetadata> = {
-  ecuador: {
-    domain: "https://www.dismal.net",
-    language: "es-EC",
-    title: "Dismal Ecuador | Tecnologia y licencias digitales",
-    description: "Compra computadoras, impresoras, telefonia movil, discos SSD y licencias digitales en Ecuador."
-  },
-  peru: {
-    domain: "https://www.dismal.net.pe",
-    language: "es-PE",
-    title: "Dismal Perú | Software y licencias digitales",
-    description: "Compara software y licencias digitales en Perú con precios visibles, seguimiento de orden y soporte postventa."
-  }
+const site: SiteMetadata = {
+  domain: "https://dismalec.com",
+  language: "es-EC",
+  title: "Dismal Ecuador | Tecnología y licencias digitales",
+  description: "Compra computadoras, impresoras, telefonía móvil, discos SSD y licencias digitales en Ecuador."
 };
 
 const publicRoutes = ["/", "/catalogo", "/ofertas", "/distribuidores", "/nosotros", "/ayuda", "/terminos", "/privacidad", "/garantia"];
@@ -32,7 +24,7 @@ function metadataPlugin(site: SiteMetadata) {
       return html
         .replace('<html lang="es">', `<html lang="${site.language}">`)
         .replace("__DISMAL_STOREFRONT_DESCRIPTION__", site.description)
-        .replace("<title>Dismal Store</title>", `<title>${site.title}</title>\n    <link rel="canonical" href="${site.domain}/" />\n    <link rel="alternate" hreflang="es-EC" href="https://www.dismal.net/" />\n    <link rel="alternate" hreflang="es-PE" href="https://www.dismal.net.pe/" />\n    <link rel="alternate" hreflang="x-default" href="https://www.dismal.net/" />\n    <meta property="og:title" content="${site.title}" />\n    <meta property="og:description" content="${site.description}" />\n    <meta property="og:type" content="website" />\n    <meta property="og:site_name" content="Dismal" />\n    <meta property="og:locale" content="${site.language.replace("-", "_")}" />\n    <meta property="og:url" content="${site.domain}/" />\n    <meta property="og:image" content="${site.domain}/assets/dismal-store-hero-v2.webp" />\n    <meta name="twitter:card" content="summary_large_image" />`);
+        .replace("<title>Dismal Store</title>", `<title>${site.title}</title>\n    <link rel="canonical" href="${site.domain}/" />\n    <link rel="alternate" hreflang="es-EC" href="${site.domain}/" />\n    <link rel="alternate" hreflang="x-default" href="${site.domain}/" />\n    <meta property="og:title" content="${site.title}" />\n    <meta property="og:description" content="${site.description}" />\n    <meta property="og:type" content="website" />\n    <meta property="og:site_name" content="Dismal" />\n    <meta property="og:locale" content="${site.language.replace("-", "_")}" />\n    <meta property="og:url" content="${site.domain}/" />\n    <meta property="og:image" content="${site.domain}/assets/dismal-store-hero-v2.webp" />\n    <meta name="twitter:card" content="summary_large_image" />`);
     },
     generateBundle(this: { emitFile: (asset: { type: "asset"; fileName: string; source: string }) => void }) {
       this.emitFile({
@@ -50,10 +42,10 @@ function metadataPlugin(site: SiteMetadata) {
 }
 
 export default defineConfig(({ mode }) => {
-  const countryMode = mode === "peru" ? "peru" : "ecuador";
+  const countryMode = "ecuador";
   const outDir = mode === "peru" || mode === "ecuador" ? `dist/${countryMode}` : "dist";
   return {
-    plugins: [react(), metadataPlugin(sites[countryMode])],
+    plugins: [react(), metadataPlugin(site)],
     build: {
       outDir,
       emptyOutDir: true,

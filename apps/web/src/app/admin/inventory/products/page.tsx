@@ -20,6 +20,12 @@ type Product = {
   peDistributorPrice?: number | null;
   platform: string | null;
   imageUrl: string | null;
+  sku?: string | null;
+  barcode?: string | null;
+  brand?: string | null;
+  physicalProduct?: boolean;
+  stockQuantity?: number | null;
+  reservedQuantity?: number | null;
 };
 
 type StockSummary = {
@@ -56,8 +62,8 @@ type PriceListAction =
 const defaultPriceListSelection: PriceListSelection = {
   includeEcFinalPrice: true,
   includeEcDistributorPrice: true,
-  includePeFinalPrice: true,
-  includePeDistributorPrice: true,
+  includePeFinalPrice: false,
+  includePeDistributorPrice: false,
   includeStock: true,
 };
 
@@ -101,6 +107,11 @@ export default function AdminProductsPage() {
     peDistributorPrice: "",
     platform: "",
     imageUrl: "",
+    sku: "",
+    barcode: "",
+    brand: "",
+    physicalProduct: true,
+    stockQuantity: "0",
   });
 
   const loadProducts = useCallback(async () => {
@@ -164,6 +175,11 @@ export default function AdminProductsPage() {
       peDistributorPrice: String(selected.peDistributorPrice ?? ""),
       platform: selected.platform || "",
       imageUrl: selected.imageUrl || "",
+      sku: selected.sku || "",
+      barcode: selected.barcode || "",
+      brand: selected.brand || "",
+      physicalProduct: selected.physicalProduct === true,
+      stockQuantity: String(selected.stockQuantity ?? 0),
     });
   }, [selected]);
 
@@ -177,15 +193,13 @@ export default function AdminProductsPage() {
     try {
       const ecFinalPrice = Number(form.ecFinalPrice);
       const ecDistributorPrice = Number(form.ecDistributorPrice);
-      const peFinalPrice = Number(form.peFinalPrice);
-      const peDistributorPrice = Number(form.peDistributorPrice);
       if (
         !form.name.trim()
-        || [ecFinalPrice, ecDistributorPrice, peFinalPrice, peDistributorPrice].some(
+        || [ecFinalPrice, ecDistributorPrice].some(
           (value) => Number.isNaN(value) || value <= 0
         )
       ) {
-        setError("Completa nombre y los cuatro precios validos para guardar.");
+        setError("Completa el nombre y los precios de Ecuador para guardar.");
         return;
       }
       const payload = {
@@ -194,10 +208,15 @@ export default function AdminProductsPage() {
         price: ecFinalPrice,
         ecFinalPrice,
         ecDistributorPrice,
-        peFinalPrice,
-        peDistributorPrice,
+        peFinalPrice: ecFinalPrice,
+        peDistributorPrice: ecDistributorPrice,
         platform: form.platform || null,
         imageUrl: form.imageUrl || null,
+        sku: form.sku.trim() || null,
+        barcode: form.barcode.trim() || null,
+        brand: form.brand.trim() || null,
+        physicalProduct: form.physicalProduct,
+        stockQuantity: form.physicalProduct ? Math.max(0, Number(form.stockQuantity) || 0) : 0,
       };
       const created = await apiFetch<Product>("/api/backend/api/v1/store/products", {
         method: "POST",
@@ -219,15 +238,13 @@ export default function AdminProductsPage() {
     try {
       const ecFinalPrice = Number(form.ecFinalPrice);
       const ecDistributorPrice = Number(form.ecDistributorPrice);
-      const peFinalPrice = Number(form.peFinalPrice);
-      const peDistributorPrice = Number(form.peDistributorPrice);
       if (
         !form.name.trim()
-        || [ecFinalPrice, ecDistributorPrice, peFinalPrice, peDistributorPrice].some(
+        || [ecFinalPrice, ecDistributorPrice].some(
           (value) => Number.isNaN(value) || value <= 0
         )
       ) {
-        setError("Completa nombre y los cuatro precios validos para guardar.");
+        setError("Completa el nombre y los precios de Ecuador para guardar.");
         return;
       }
       const payload = {
@@ -236,10 +253,15 @@ export default function AdminProductsPage() {
         price: ecFinalPrice,
         ecFinalPrice,
         ecDistributorPrice,
-        peFinalPrice,
-        peDistributorPrice,
+        peFinalPrice: ecFinalPrice,
+        peDistributorPrice: ecDistributorPrice,
         platform: form.platform || null,
         imageUrl: form.imageUrl || null,
+        sku: form.sku.trim() || null,
+        barcode: form.barcode.trim() || null,
+        brand: form.brand.trim() || null,
+        physicalProduct: form.physicalProduct,
+        stockQuantity: form.physicalProduct ? Math.max(0, Number(form.stockQuantity) || 0) : 0,
       };
       const updated = await apiFetch<Product>(`/api/backend/api/v1/store/products/${selected.id}`, {
         method: "PUT",
@@ -281,6 +303,11 @@ export default function AdminProductsPage() {
       peDistributorPrice: "",
       platform: "",
       imageUrl: "",
+      sku: "",
+      barcode: "",
+      brand: "",
+      physicalProduct: true,
+      stockQuantity: "0",
     });
     window.requestAnimationFrame(() => {
       formPanelRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -458,21 +485,16 @@ export default function AdminProductsPage() {
 
   const shortId = (id: string) => id.replace(/-/g, "").slice(0, 5).toUpperCase();
   const getEcFinalPrice = (product: Product) => product.ecFinalPrice ?? product.price ?? 0;
-  const getPeFinalPrice = (product: Product) => product.peFinalPrice ?? 0;
   const ecFinalPriceValue = Number(form.ecFinalPrice);
   const ecDistributorPriceValue = Number(form.ecDistributorPrice);
-  const peFinalPriceValue = Number(form.peFinalPrice);
-  const peDistributorPriceValue = Number(form.peDistributorPrice);
   const canSave =
     form.name.trim().length > 0 &&
-    [ecFinalPriceValue, ecDistributorPriceValue, peFinalPriceValue, peDistributorPriceValue].every(
+    [ecFinalPriceValue, ecDistributorPriceValue].every(
       (value) => !Number.isNaN(value) && value > 0
     );
   const missingPriceFields = [
     { label: "EC Final", value: ecFinalPriceValue },
     { label: "EC Distribuidor", value: ecDistributorPriceValue },
-    { label: "PE Final", value: peFinalPriceValue },
-    { label: "PE Distribuidor", value: peDistributorPriceValue },
   ].filter((item) => Number.isNaN(item.value) || item.value <= 0);
   const emailReady = sendForm.toEmail.trim().length > 0 && sendForm.subject.trim().length > 0;
   const whatsappReady = sendForm.whatsappPhone.trim().length > 0;
@@ -540,12 +562,11 @@ export default function AdminProductsPage() {
                 <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Inventario</p>
                 <h2 className="text-2xl font-semibold text-ink">Catalogo de productos</h2>
                 <p className="mt-2 max-w-2xl text-sm text-slate-500">
-                  Gestiona el software, precios y datos clave para ventas.
+                  Gestiona productos físicos y digitales, precios en USD e inventario para Ecuador.
                 </p>
                 {isCreating && (
                   <div className="mt-4 max-w-2xl rounded-2xl border border-emerald-300/50 bg-white/85 px-4 py-3 text-sm text-emerald-800 shadow-sm">
-                    Estas creando un producto nuevo. Completa nombre y los cuatro precios:
-                    EC Final, EC Distribuidor, PE Final y PE Distribuidor.
+                    Estás creando un producto nuevo para Ecuador. Define su tipo, inventario y precios en USD.
                   </div>
                 )}
               </div>
@@ -564,7 +585,7 @@ export default function AdminProductsPage() {
                 <p className="text-xs uppercase tracking-[0.4em] text-slate-400">Lista de precios</p>
                 <h3 className="text-lg font-semibold text-ink">Envio rapido</h3>
                 <p className="mt-2 text-sm text-slate-500">
-                  Genera PDF, Excel y texto listo para WhatsApp con los cuatro precios por producto.
+                  Genera PDF, Excel y texto para WhatsApp con precios de Ecuador y stock disponible.
                 </p>
                 {priceListError && (
                   <p className="mt-3 rounded-xl border border-rose-400/30 bg-rose-50 px-3 py-2 text-xs text-rose-700">
@@ -741,8 +762,8 @@ export default function AdminProductsPage() {
                     <div className="grid items-center gap-2 bg-slate-50 px-2 py-2 text-[11px] uppercase tracking-[0.18em] text-slate-500 md:grid-cols-[0.5fr_1.4fr_0.8fr_0.8fr_0.6fr]">
                       <span>ID</span>
                       <span>Producto</span>
-                      <span className="md:text-right">EC Final</span>
-                      <span className="md:text-right">PE Final</span>
+                      <span>Tipo</span>
+                      <span className="md:text-right">Precio USD</span>
                       <span className="md:text-right">Stock</span>
                     </div>
                   )}
@@ -757,10 +778,12 @@ export default function AdminProductsPage() {
                       <div className="grid items-center gap-2 md:grid-cols-[0.5fr_1.4fr_0.8fr_0.8fr_0.6fr]">
                         <p className="text-xs font-semibold text-slate-500">{shortId(product.id)}</p>
                         <p className="text-sm font-semibold text-ink">{product.name}</p>
+                        <p className="text-xs font-semibold text-slate-500">{product.physicalProduct ? "Físico" : "Digital"}</p>
                         <p className="text-sm text-slate-600 md:text-right">{formatCurrency(getEcFinalPrice(product))}</p>
-                        <p className="text-sm text-slate-600 md:text-right">{formatCurrency(getPeFinalPrice(product))}</p>
                         <p className="text-sm text-slate-600 md:text-right">
-                          {stockByProduct[product.id]?.available ?? 0}
+                          {product.physicalProduct
+                            ? Math.max(0, (product.stockQuantity ?? 0) - (product.reservedQuantity ?? 0))
+                            : stockByProduct[product.id]?.available ?? 0}
                         </p>
                       </div>
                     </button>
@@ -785,7 +808,7 @@ export default function AdminProductsPage() {
                   <div className="flex items-center gap-2">
                     {isCreating && (
                       <span className="rounded-full border border-emerald-300 bg-white px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-700">
-                        4 precios requeridos
+                        Ecuador · USD
                       </span>
                     )}
                     {!isCreating && (
@@ -814,8 +837,7 @@ export default function AdminProductsPage() {
                     <div className="rounded-2xl border border-emerald-200 bg-white px-4 py-4">
                       <p className="text-sm font-semibold text-ink">Antes de guardar</p>
                       <p className="mt-1 text-xs text-slate-500">
-                        Debes llenar nombre y estos cuatro precios para habilitar la creacion:
-                        EC Final, EC Distribuidor, PE Final y PE Distribuidor.
+                        Debes indicar si es un producto físico o digital y completar los dos precios para Ecuador.
                       </p>
                       {missingPriceFields.length > 0 ? (
                         <p className="mt-3 text-xs text-amber-700">
@@ -847,7 +869,7 @@ export default function AdminProductsPage() {
                         onChange={(event) => setForm((prev) => ({ ...prev, platform: event.target.value }))}
                       />
                       <p className="mt-2 text-xs text-slate-500">
-                        Ej: Windows, macOS, Linux, Web o Mobile.
+                        Ej: Windows, Web, iOS, Android o producto físico.
                       </p>
                     </div>
                     <div>
@@ -860,16 +882,34 @@ export default function AdminProductsPage() {
                       />
                     </div>
                   </div>
+                  <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                    <p className="text-sm font-semibold text-ink">Tipo e inventario</p>
+                    <div className="mt-3 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+                      <label className={`cursor-pointer rounded-xl border p-3 ${form.physicalProduct ? "border-accent bg-accent/5" : "border-slate-200"}`}>
+                        <input type="radio" className="mr-2" checked={form.physicalProduct} onChange={() => setForm((prev) => ({ ...prev, physicalProduct: true }))} />
+                        Producto físico
+                      </label>
+                      <label className={`cursor-pointer rounded-xl border p-3 ${!form.physicalProduct ? "border-accent bg-accent/5" : "border-slate-200"}`}>
+                        <input type="radio" className="mr-2" checked={!form.physicalProduct} onChange={() => setForm((prev) => ({ ...prev, physicalProduct: false, stockQuantity: "0" }))} />
+                        Licencia o producto digital
+                      </label>
+                      <div><label className="label-pill">SKU</label><input className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" value={form.sku} onChange={(event) => setForm((prev) => ({ ...prev, sku: event.target.value }))} /></div>
+                      <div><label className="label-pill">Marca</label><input className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" value={form.brand} onChange={(event) => setForm((prev) => ({ ...prev, brand: event.target.value }))} /></div>
+                      <div><label className="label-pill">Código de barras</label><input className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" value={form.barcode} onChange={(event) => setForm((prev) => ({ ...prev, barcode: event.target.value }))} /></div>
+                      {form.physicalProduct ? <div><label className="label-pill">Existencias</label><input type="number" min={0} step={1} className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm" value={form.stockQuantity} onChange={(event) => setForm((prev) => ({ ...prev, stockQuantity: event.target.value }))} /></div> : null}
+                    </div>
+                    <p className="mt-3 text-xs text-slate-500">Los productos físicos descuentan existencias; los digitales consumen activaciones de licencias.</p>
+                  </div>
                   <div className="rounded-2xl border border-slate-200 bg-slate-50/80 p-4">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <div>
-                        <p className="text-sm font-semibold text-ink">Precios por mercado</p>
+                        <p className="text-sm font-semibold text-ink">Precios para Ecuador</p>
                         <p className="text-xs text-slate-500">
-                          Configura los cuatro precios que usa el sistema al vender.
+                          Configura precios en dólares para cliente final y distribuidor.
                         </p>
                       </div>
                     </div>
-                    <div className="mt-4 grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <div className="mt-4 grid gap-3 md:grid-cols-2">
                       <div className="rounded-xl border border-slate-200 bg-white p-3">
                         <label className="label-pill">EC Final</label>
                         <input
@@ -894,32 +934,6 @@ export default function AdminProductsPage() {
                           className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-ink focus:border-accent focus:outline-none"
                           value={form.ecDistributorPrice}
                           onChange={(event) => setForm((prev) => ({ ...prev, ecDistributorPrice: event.target.value }))}
-                        />
-                      </div>
-                      <div className="rounded-xl border border-slate-200 bg-white p-3">
-                        <label className="label-pill">PE Final</label>
-                        <input
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          inputMode="decimal"
-                          placeholder="0.00"
-                          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-ink focus:border-accent focus:outline-none"
-                          value={form.peFinalPrice}
-                          onChange={(event) => setForm((prev) => ({ ...prev, peFinalPrice: event.target.value }))}
-                        />
-                      </div>
-                      <div className="rounded-xl border border-slate-200 bg-white p-3">
-                        <label className="label-pill">PE Distribuidor</label>
-                        <input
-                          type="number"
-                          min={0}
-                          step="0.01"
-                          inputMode="decimal"
-                          placeholder="0.00"
-                          className="mt-2 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-ink focus:border-accent focus:outline-none"
-                          value={form.peDistributorPrice}
-                          onChange={(event) => setForm((prev) => ({ ...prev, peDistributorPrice: event.target.value }))}
                         />
                       </div>
                     </div>
@@ -948,7 +962,7 @@ export default function AdminProductsPage() {
                     )}
                     {!canSave && (
                       <p className="text-xs text-slate-500">
-                        Completa nombre y los cuatro precios para habilitar el guardado.
+                        Completa el nombre y los dos precios de Ecuador para habilitar el guardado.
                       </p>
                     )}
                     {!isCreating && (
@@ -995,8 +1009,8 @@ export default function AdminProductsPage() {
                         setPriceListSelection({
                           includeEcFinalPrice: event.target.checked,
                           includeEcDistributorPrice: event.target.checked,
-                          includePeFinalPrice: event.target.checked,
-                          includePeDistributorPrice: event.target.checked,
+                          includePeFinalPrice: false,
+                          includePeDistributorPrice: false,
                           includeStock: event.target.checked,
                         })
                       }
@@ -1008,8 +1022,6 @@ export default function AdminProductsPage() {
                   {([
                     ["includeEcFinalPrice", "Precio 1 - EC Final"],
                     ["includeEcDistributorPrice", "Precio 2 - EC Distribuidor"],
-                    ["includePeFinalPrice", "Precio 3 - PE Final"],
-                    ["includePeDistributorPrice", "Precio 4 - PE Distribuidor"],
                     ["includeStock", "Stock disponible"],
                   ] as Array<[keyof PriceListSelection, string]>).map(([key, label]) => (
                     <label

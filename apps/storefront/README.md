@@ -1,11 +1,12 @@
 # Dismal Storefront
 
-Tienda estatica para `www.dismal.net` (Ecuador) y `www.dismal.net.pe` (Peru). El hosting compartido sirve solamente HTML, CSS, JavaScript e imagenes; toda la logica sensible permanece en `api.dismal.vip`.
+Tienda de Dismal Distribuciones para Ecuador en `dismalec.com`. El hosting compartido sirve HTML, CSS, JavaScript e imagenes; la logica sensible permanece en `api.dismal.vip`.
 
 ## Funcionalidad actual
 
-- Catalogo y precios por pais.
-- Portada, catalogo y paginas permanentes de producto con presentacion adaptada a cada pais.
+- Catalogo unico en USD para Ecuador.
+- Productos fisicos con inventario y productos digitales con activaciones/licencias.
+- Portada, catalogo y paginas permanentes de todos los productos, incluso los que temporalmente no tienen stock.
 - Carrito persistente y checkout validado por backend.
 - Cuenta de cliente creada durante la primera compra.
 - Inicio de sesion para cliente final o distribuidor aprobado.
@@ -13,8 +14,8 @@ Tienda estatica para `www.dismal.net` (Ecuador) y `www.dismal.net.pe` (Peru). El
 - Perfil editable y solicitudes de distribuidor con aprobacion administrativa.
 - Precio distribuidor protegido por autenticacion.
 - Historial de ordenes y consulta privada de licencias entregadas.
-- Transferencia bancaria por pais con registro de referencia y estado `PAYMENT_REVIEW`.
-- Revision administrativa idempotente que crea venta, registra pago y entrega licencia.
+- Transferencia bancaria en Ecuador con registro de referencia y estado `PAYMENT_REVIEW`.
+- Revision administrativa idempotente que crea la venta, registra el pago y prepara el envio fisico o la activacion digital.
 - Compra directa con cupo de credito para cuentas verificadas y previamente aprobadas.
 - Cuentas por cobrar y consumo/liberacion del cupo gestionados por el backend.
 - SEO, reglas de seguridad, cache y compresion para Apache.
@@ -26,7 +27,6 @@ Los comandos se ejecutan localmente o en CI, nunca en el hosting compartido:
 ```bash
 npm install
 npm run build:ec
-npm run build:pe
 npm run build:all
 npm run verify:build
 ```
@@ -34,8 +34,7 @@ npm run verify:build
 Salidas:
 
 ```text
-dist/ecuador/  -> contenido de public_html para www.dismal.net
-dist/peru/     -> contenido de public_html para www.dismal.net.pe
+dist/ecuador/  -> contenido del document root de dismalec.com
 ```
 
 Cada carpeta incluye `index.html`, `.htaccess`, `robots.txt`, `sitemap.xml`, `assets/` y las imagenes publicas. Se sube el contenido de la carpeta, no la carpeta contenedora. `verify:build` comprueba los archivos, metadatos, reglas de seguridad y rutas publicas antes de publicar.
@@ -52,18 +51,16 @@ Para conectar un backend local:
 VITE_DISMAL_API_URL=http://localhost:8080
 ```
 
-Los botones de WhatsApp se habilitan solo cuando existe un numero configurado para el pais. Debe escribirse con codigo internacional y solo digitos:
+Los botones de WhatsApp se habilitan solo cuando existe un numero configurado. Debe escribirse con codigo internacional y solo digitos:
 
 ```env
 VITE_WHATSAPP_EC=593...
-VITE_WHATSAPP_PE=51...
 ```
 
 Telegram se habilita solamente cuando se configura el usuario publico del bot o canal, sin `@`:
 
 ```env
 VITE_TELEGRAM_EC=dismal_ec
-VITE_TELEGRAM_PE=dismal_pe
 ```
 
 ## Limite de responsabilidad

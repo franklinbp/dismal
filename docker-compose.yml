@@ -25,8 +25,8 @@ services:
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       AES_KEY: ${AES_KEY}
       CORS_ALLOWED_ORIGINS: ${CORS_ALLOWED_ORIGINS}
-      ACCOUNT_EC_STOREFRONT_URL: ${ACCOUNT_EC_STOREFRONT_URL:-https://www.dismal.net}
-      ACCOUNT_PE_STOREFRONT_URL: ${ACCOUNT_PE_STOREFRONT_URL:-https://www.dismal.net.pe}
+      ACCOUNT_EC_STOREFRONT_URL: ${ACCOUNT_EC_STOREFRONT_URL:-https://dismalec.com}
+      ACCOUNT_PE_STOREFRONT_URL: ${ACCOUNT_PE_STOREFRONT_URL:-https://dismalec.com}
       SMTP_ENABLED: ${SMTP_ENABLED:-false}
       SMTP_HOST: ${SMTP_HOST:-}
       SMTP_PORT: ${SMTP_PORT:-0}
@@ -55,7 +55,7 @@ services:
       DISMAL_CRM_WHATSAPP_ID_BY_COUNTRY: ${DISMAL_CRM_WHATSAPP_ID_BY_COUNTRY:-}
       WOOCOMMERCE_API_KEY: ${WOOCOMMERCE_API_KEY:-}
     ports:
-      - "127.0.0.1:9001:8080"
+      - "127.0.0.1:9002:8080"
     depends_on:
       db:
         condition: service_healthy
@@ -64,10 +64,10 @@ services:
     build: ./apps/web
     environment:
       NODE_ENV: production
-      BASE_API_URL: http://backend:8080
-      NEXT_PUBLIC_BASE_API_URL: http://backend:8080
+      BASE_API_URL: http://dismal-api:8080
+      NEXT_PUBLIC_BASE_API_URL: http://dismal-api:8080
     ports:
-      - "127.0.0.1:6001:3000"
+      - "127.0.0.1:6002:3000"
     depends_on:
       - backend
     restart: unless-stopped

@@ -7,6 +7,9 @@ services:
           - dismal-api
 
   web:
+    environment:
+      BASE_API_URL: http://dismal-api:8080
+      NEXT_PUBLIC_BASE_API_URL: http://dismal-api:8080
     networks:
       default:
       easypanel:

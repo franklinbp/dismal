@@ -43,6 +43,12 @@ public class StoreController {
             BigDecimal price,
             String platform,
             String imageUrl,
+            String sku,
+            String barcode,
+            String brand,
+            Boolean physicalProduct,
+            Integer stockQuantity,
+            Integer reservedQuantity,
             BigDecimal ecFinalPrice,
             BigDecimal ecDistributorPrice,
             BigDecimal peFinalPrice,
@@ -56,6 +62,12 @@ public class StoreController {
                     software.getPrice(),
                     software.getPlatform(),
                     software.getImageUrl(),
+                    software.getSku(),
+                    software.getBarcode(),
+                    software.getBrand(),
+                    Boolean.TRUE.equals(software.getPhysicalProduct()),
+                    software.getStockQuantity(),
+                    software.getReservedQuantity(),
                     pricing.ecFinalPrice(),
                     pricing.ecDistributorPrice(),
                     pricing.peFinalPrice(),
@@ -70,6 +82,11 @@ public class StoreController {
             BigDecimal price,
             String platform,
             String imageUrl,
+            String sku,
+            String barcode,
+            String brand,
+            Boolean physicalProduct,
+            Integer stockQuantity,
             BigDecimal ecFinalPrice,
             BigDecimal ecDistributorPrice,
             BigDecimal peFinalPrice,
@@ -82,6 +99,11 @@ public class StoreController {
                     .price(ecFinalPrice != null ? ecFinalPrice : price)
                     .platform(platform)
                     .imageUrl(imageUrl)
+                    .sku(sku)
+                    .barcode(barcode)
+                    .brand(brand)
+                    .physicalProduct(Boolean.TRUE.equals(physicalProduct))
+                    .stockQuantity(stockQuantity != null ? Math.max(0, stockQuantity) : 0)
                     .build();
         }
     }

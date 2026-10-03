@@ -79,6 +79,7 @@ public class StoreService {
         existingSoftware.setPrice(softwareDetails.getPrice());
         existingSoftware.setPlatform(softwareDetails.getPlatform());
         existingSoftware.setImageUrl(softwareDetails.getImageUrl());
+        copyCommerceFields(existingSoftware, softwareDetails);
 
         Software updatedSoftware = softwareRepository.save(existingSoftware);
         syncPublicPriceList(updatedSoftware);
@@ -140,6 +141,7 @@ public class StoreService {
         existingSoftware.setPrice(ecFinalPrice);
         existingSoftware.setPlatform(softwareDetails.getPlatform());
         existingSoftware.setImageUrl(softwareDetails.getImageUrl());
+        copyCommerceFields(existingSoftware, softwareDetails);
 
         Software updatedSoftware = softwareRepository.save(existingSoftware);
         syncConfiguredPriceLists(updatedSoftware, ecFinalPrice, ecDistributorPrice, peFinalPrice, peDistributorPrice);
@@ -171,6 +173,17 @@ public class StoreService {
         syncPriceList(software, PriceListType.EC_DISTRIBUTOR, ecDistributorPrice != null ? ecDistributorPrice : ecFinalPrice);
         syncPriceList(software, PriceListType.PE_FINAL, peFinalPrice != null ? peFinalPrice : ecFinalPrice);
         syncPriceList(software, PriceListType.PE_DISTRIBUTOR, peDistributorPrice != null ? peDistributorPrice : peFinalPrice != null ? peFinalPrice : ecFinalPrice);
+    }
+
+    private void copyCommerceFields(Software target, Software source) {
+        target.setSku(source.getSku());
+        target.setBarcode(source.getBarcode());
+        target.setBrand(source.getBrand());
+        target.setPhysicalProduct(Boolean.TRUE.equals(source.getPhysicalProduct()));
+        target.setStockQuantity(source.getStockQuantity() != null ? Math.max(0, source.getStockQuantity()) : 0);
+        if (!Boolean.TRUE.equals(target.getPhysicalProduct())) {
+            target.setReservedQuantity(0);
+        }
     }
 
     private void syncPriceList(Software software, PriceListType type, java.math.BigDecimal price) {

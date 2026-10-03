@@ -14,8 +14,7 @@ const routes = [
 ];
 
 const sites = [
-  { build: "ecuador", domain: "https://www.dismal.net", language: "es-EC" },
-  { build: "peru", domain: "https://www.dismal.net.pe", language: "es-PE" }
+  { build: "ecuador", domain: "https://dismalec.com", language: "es-EC" }
 ];
 
 function assert(condition, message) {
@@ -45,7 +44,6 @@ for (const site of sites) {
   assert(html.includes(`rel="canonical" href="${site.domain}/"`), `[${site.build}] Invalid canonical URL`);
   assert(html.includes(`${site.domain}/assets/dismal-store-hero-v2.webp`), `[${site.build}] Missing social image`);
   assert(html.includes('hreflang="es-EC"'), `[${site.build}] Missing Ecuador alternate`);
-  assert(html.includes('hreflang="es-PE"'), `[${site.build}] Missing Peru alternate`);
   assert(htaccess.includes("RewriteRule ^ index.html [L]"), `[${site.build}] Missing SPA rewrite`);
   assert(htaccess.includes("^sample-page/?$"), `[${site.build}] Missing legacy page redirect`);
   assert(htaccess.includes("^mayoristas/?$"), `[${site.build}] Missing distributor legacy redirect`);
@@ -56,4 +54,4 @@ for (const site of sites) {
   }
 }
 
-console.log("Storefront production builds verified for Ecuador and Peru.");
+console.log("Storefront production build verified for Ecuador.");
