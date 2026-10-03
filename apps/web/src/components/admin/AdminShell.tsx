@@ -7,6 +7,7 @@ import { useEffect } from "react";
 import AdminSidebar from "./AdminSidebar";
 import { type UserRole } from "@/lib/auth";
 import { apiFetch } from "@/lib/api";
+import Link from "next/link";
 
 export default function AdminShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -57,6 +58,18 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           </div>
           <div className="flex-1" />
           <div className="flex flex-wrap items-center gap-2.5 text-sm">
+            <Link
+              href="/admin/sales?intent=create-sale"
+              className="rounded-full bg-cyan-600 px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-white shadow-sm transition hover:bg-cyan-700"
+            >
+              + Crear venta
+            </Link>
+            <Link
+              href="/admin/admin/users?intent=create-client"
+              className="rounded-full border border-cyan-600 bg-white px-4 py-2 text-xs font-bold uppercase tracking-[0.12em] text-cyan-700 transition hover:bg-cyan-50"
+            >
+              + Crear cliente
+            </Link>
             <span className="rounded-full border border-[var(--color-border)] bg-white/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--color-text-muted)]">
               {user.role}
             </span>

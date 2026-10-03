@@ -749,7 +749,13 @@ export default function AdminSalesPage() {
 
   useEffect(() => {
     const intent = searchParams.get("intent");
-    if (intent === "create-customer") {
+    if (intent === "create-sale") {
+      setShowCreateForm(true);
+      requestAnimationFrame(() => {
+        createSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+      router.replace("/admin/sales");
+    } else if (intent === "create-customer") {
       setShowCreateForm(true);
       setShowCreateCustomerModal(true);
       requestAnimationFrame(() => {

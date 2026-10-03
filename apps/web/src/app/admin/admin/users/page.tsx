@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { apiFetch } from "@/lib/api";
 import AdminHeader from "@/components/admin/AdminHeader";
 import AdminActionButton from "@/components/admin/AdminActionButton";
@@ -56,6 +56,7 @@ const defaultPage: PageResponse<AdminUser> = {
 type TabType = "internal" | "client";
 
 export default function AdminUsersPage() {
+  const searchParams = useSearchParams();
   const router = useRouter();
   const { user, allowed } = useAdminGuard("ADMIN_ONLY");
   const [activeTab, setActiveTab] = useState<TabType>("internal");
@@ -343,6 +344,15 @@ export default function AdminUsersPage() {
     setFieldErrors({});
     resetForm(nextTab, true);
   };
+
+  useEffect(() => {
+    if (searchParams.get("intent") === "create-client") {
+      handleCreate("client");
+      router.replace("/admin/admin/users");
+    }
+    // La intención de navegación se consume una sola vez.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, router]);
 
   const handleClear = () => {
     handleCreate(activeTab);
